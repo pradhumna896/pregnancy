@@ -120,15 +120,16 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                           dividerColor: AppColor.secondary,
                           expandedHeaderPadding: EdgeInsets.zero,
                           expandIconColor: Colors.white,
-                          
                           elevation: 1,
                           children: [
                             ExpansionPanel(
-
                               backgroundColor: AppColor.secondary,
                               headerBuilder: (context, isExpanded) {
                                 return ListTile(
-                                  title: Text("Not Completed Checkups",style: KtxtStyle().text16DarkWhitew600,),
+                                  title: Text(
+                                    "Not Completed Checkups",
+                                    style: KtxtStyle().text16DarkWhitew600,
+                                  ),
                                 );
                               },
                               body: Column(
@@ -391,10 +392,13 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                               isExpanded: isNotCompletedExpanded,
                             ),
                             ExpansionPanel(
-                                backgroundColor: AppColor.secondary,
+                              backgroundColor: AppColor.secondary,
                               headerBuilder: (context, isExpanded) {
                                 return ListTile(
-                                  title: Text("Completed Checkups",style: KtxtStyle().text16DarkWhitew600,),
+                                  title: Text(
+                                    "Completed Checkups",
+                                    style: KtxtStyle().text16DarkWhitew600,
+                                  ),
                                 );
                               },
                               body: Column(
@@ -565,9 +569,10 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                 },
                                                 onError: (error) {
                                                   showErrorToast(
-                                                      toast,
-                                                      error!.graphqlErrors[0]
-                                                          .message);
+                                                    toast,
+                                                    error!.graphqlErrors[0]
+                                                        .message,
+                                                  );
                                                 },
                                               ),
                                               builder: (runMutation, result) {

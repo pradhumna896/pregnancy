@@ -49,27 +49,22 @@ query FindMaternityById($findMaternityByIdId: Float!) {
     lastMenstrualDate
     createdAt
     updatedAt
-    
     userId
   }
 }''';
   Future<void> downloadAndShareFile(String url) async {
     try {
       // Specify the URL
-
       // Send the HTTP GET request
       final response = await http.get(Uri.parse(url));
-
       // Check if the request was successful
       if (response.statusCode == 200) {
         // Get the application's document directory
         final directory = await getApplicationDocumentsDirectory();
         final filePath = '${directory.path}/pregnancy_calendar.csv';
-
         // Write the file to the specified path
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
-
         // Share the file
         await Share.shareFiles([filePath],
             text: 'Here is the pregnancy calendar.');

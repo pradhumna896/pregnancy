@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pragnancy_app/theme/app_color.dart';
 
-
-
 class CustomLoader extends StatelessWidget {
   const CustomLoader({
     super.key,
