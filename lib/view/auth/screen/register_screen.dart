@@ -103,7 +103,8 @@ mutation Register($registerData: RegisterDto!) {
     dateController.text = TimeFormateMethod()
         .getTimeFormate(time: widget.user["lastMenstrualDate"]);
   }
-   final formKey = GlobalKey<FormState>();
+
+  final formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,7 +115,9 @@ mutation Register($registerData: RegisterDto!) {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>widget.title=="registration"?LoginScreen(): HomeScreen(),
+                    builder: (context) => widget.title == "registration"
+                        ? LoginScreen()
+                        : HomeScreen(),
                   ),
                   (route) => false,
                 );
@@ -125,7 +128,7 @@ mutation Register($registerData: RegisterDto!) {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: SingleChildScrollView(
                 child: Form(
-                    key: formKey,
+                  key: formKey,
                   child: Column(
                     children: [
                       CustomTextFormField(
@@ -145,8 +148,10 @@ mutation Register($registerData: RegisterDto!) {
                       CustomTextFormField(
                         validator: (value) {
                           if (value!.isEmpty) {
-                            return getLocalized(context, "Please enter your mobile");
-                          }},
+                            return getLocalized(
+                                context, "Please enter your mobile");
+                          }
+                        },
                         readOnly: widget.title == "edit_profile",
                         controller: mobileController,
                         hintText: getLocalized(context, "enter_mobile_number"),
@@ -158,8 +163,9 @@ mutation Register($registerData: RegisterDto!) {
                       CustomTextFormField(
                         validator: (value) {
                           if (value!.isEmpty) {
-                            return getLocalized(context, "Please enter your age");
-                            }
+                            return getLocalized(
+                                context, "Please enter your age");
+                          }
                         },
                         controller: ageController,
                         hintText: getLocalized(context, "enter_age"),
@@ -171,11 +177,10 @@ mutation Register($registerData: RegisterDto!) {
                       CustomTextFormField(
                         validator: (value) {
                           if (value!.isEmpty) {
-                            return getLocalized(context, "Please enter your height");
-                            }
+                            return getLocalized(
+                                context, "Please enter your height");
+                          }
                         },
-      
-      
                         controller: heightController,
                         hintText: getLocalized(context, "enter_your_height"),
                         labelText: getLocalized(context, "height"),
@@ -186,8 +191,9 @@ mutation Register($registerData: RegisterDto!) {
                       CustomTextFormField(
                         validator: (value) {
                           if (value!.isEmpty) {
-                            return getLocalized(context, "Please enter your weight");
-                            }
+                            return getLocalized(
+                                context, "Please enter your weight");
+                          }
                         },
                         controller: weightController,
                         hintText: getLocalized(context, "enter_your_weight"),
@@ -196,10 +202,12 @@ mutation Register($registerData: RegisterDto!) {
                       SizedBox(
                         height: 20.h,
                       ),
-                      CustomTextFormField(validator: (value) {
+                      CustomTextFormField(
+                        validator: (value) {
                           if (value!.isEmpty) {
-                            return getLocalized(context, "Please enter your date");
-                            }
+                            return getLocalized(
+                                context, "Please enter your date");
+                          }
                         },
                         controller: dateController,
                         onTap: () async {
@@ -267,26 +275,27 @@ mutation Register($registerData: RegisterDto!) {
                               ? const CustomLoader()
                               : CustomElevatedButton(
                                   onTap: () {
-                                   if (formKey.currentState!.validate()){
-                                    widget.title == "add_family_members"
+                                    if (formKey.currentState!.validate()) {
+                                      widget.title == "add_family_members"
                                           ? runMutation({
                                               "createUserDto": {
-                                                "weight":
-                                                    weightController.text.trim(),
+                                                "weight": weightController.text
+                                                    .trim(),
                                                 "parentId": widget.id,
                                                 "name":
                                                     nameController.text.trim(),
-                                                "mobileNo":
-                                                    mobileController.text.trim(),
+                                                "mobileNo": mobileController
+                                                    .text
+                                                    .trim(),
                                                 "lastMenstrualDate":
                                                     dateController.text.trim(),
                                                 "isLoggedIn": false,
-                                                "height":
-                                                    heightController.text.trim(),
+                                                "height": heightController.text
+                                                    .trim(),
                                                 "email": null,
                                                 "createdBy": widget.id,
-                                                "age":
-                                                    int.parse(ageController.text),
+                                                "age": int.parse(
+                                                    ageController.text),
                                                 "role": "user",
                                                 "maternityId": int.parse(
                                                     SessionManager
@@ -299,8 +308,8 @@ mutation Register($registerData: RegisterDto!) {
                                                   "data": {
                                                     "age": int.parse(
                                                         ageController.text),
-                                                    "createdBy":
-                                                        widget.user["createdBy"],
+                                                    "createdBy": widget
+                                                        .user["createdBy"],
                                                     "email": null,
                                                     "height":
                                                         heightController.text,
@@ -311,9 +320,11 @@ mutation Register($registerData: RegisterDto!) {
                                                     "mobileNo":
                                                         mobileController.text,
                                                     "name": nameController.text,
-                                                    "parentId": widget.user["id"],
+                                                    "parentId":
+                                                        widget.user["id"],
                                                     "weight":
                                                         weightController.text,
+                                                    "role": "user",
                                                     "maternityId": int.parse(
                                                         SessionManager
                                                                 .getMaternityId()
@@ -335,13 +346,14 @@ mutation Register($registerData: RegisterDto!) {
                                                     "weight": weightController
                                                         .text
                                                         .trim(),
+                                                    "role": "user",
                                                     "lastMenstrualDate":
                                                         dateController.text
                                                             .trim(),
                                                     "isLoggedIn": false,
                                                   }
                                                 });
-                                   }
+                                    }
                                   },
                                   text: Text(
                                     getLocalized(context, "done"),

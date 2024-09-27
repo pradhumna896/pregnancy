@@ -1,17 +1,17 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_share/flutter_share.dart';
+
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'package:pragnancy_app/core/error_handler.dart';
+import 'package:pragnancy_app/data/env.dart';
 import 'package:pragnancy_app/utils/string_capitalization.dart';
 import 'package:pragnancy_app/utils/time_formate_methode.dart';
 import 'package:pragnancy_app/view/completePragnancyCalendar/model/all_calender_model.dart';
+import 'package:pragnancy_app/view/maternity/model/maternity_model.dart';
 import 'package:pragnancy_app/widgets/custom_loader.dart';
-import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
 import '../../../comman/routes/routes.dart';
 
 class CompletePragnancyCalendarScreen extends StatefulWidget {
@@ -28,8 +28,7 @@ class _CompletePragnancyCalendarScreenState
 query AllCalendar {
   allCalendar {
     id
-    checkup
-    note
+    weekNumber
     description
     testDate
     createdAt
@@ -38,26 +37,50 @@ query AllCalendar {
 }
 ''';
 
+  String maternityById = r'''
+query FindMaternityById($findMaternityByIdId: Float!) {
+  findMaternityById(id: $findMaternityByIdId) {
+    id
+    name
+    age
+    bmi
+    pregnancyRisk
+    expectedDateOfDelivery
+    lastMenstrualDate
+    createdAt
+    updatedAt
+    
+    userId
+  }
+}''';
+  Future<void> downloadAndShareFile(String url) async {
+    try {
+      // Specify the URL
 
-  Future<void> sharePdf() async {
-  // Load the PDF file from assets
-  final ByteData bytes = await rootBundle.load('asset/sr23_016.pdf');
+      // Send the HTTP GET request
+      final response = await http.get(Uri.parse(url));
 
-  // Get the temporary directory
-  final String dir = (await getTemporaryDirectory()).path;
+      // Check if the request was successful
+      if (response.statusCode == 200) {
+        // Get the application's document directory
+        final directory = await getApplicationDocumentsDirectory();
+        final filePath = '${directory.path}/pregnancy_calendar.csv';
 
-  // Create a new file in the temporary directory
-  final File file = File('$dir/sr23_016.pdf');
+        // Write the file to the specified path
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
 
-  // Write the PDF file data to the temporary file
-  await file.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+        // Share the file
+        await Share.shareFiles([filePath],
+            text: 'Here is the pregnancy calendar.');
+      } else {
+        print('Failed to download file: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
-  // Convert File to XFile
-  final XFile xfile = XFile(file.path);
-
-  // Share the file using share_plus
-  await Share.shareXFiles([xfile], text: 'Here is your PDF file');
-}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,26 +104,59 @@ query AllCalendar {
                       surfaceTintColor: AppColor.white,
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            _buildLabelText(
-                                labelText: getLocalized(context, "age"),
-                                labelValue: "25"),
-                            _buildLabelText(
-                                labelText: getLocalized(
-                                    context, "last_menstrual_date"),
-                                labelValue: "15/07/2024"),
-                            _buildLabelText(
-                                labelText: getLocalized(context, "bmi"),
-                                labelValue: "20.17"),
-                            _buildLabelText(
-                                labelText: getLocalized(
-                                    context, "expected_date_of_delivery"),
-                                labelValue: "10/10/2000"),
-                            SizedBox(height: 20.h),
-                          ],
+                        child: Query(
+                          options: QueryOptions(
+                              document: gql(maternityById),
+                              onComplete: (data) {
+                                if (data != null) {
+                                  print(data);
+                                }
+                              },
+                              variables: {
+                                "findMaternityByIdId": int.parse(
+                                    SessionManager.getUserId().toString())
+                              }),
+                          builder: (result, {fetchMore, refetch}) {
+                            if (result.isLoading) {
+                              return Center(
+                                child: CustomLoader(),
+                              );
+                            }
+                            if (result.hasException) {
+                              return Center(
+                                child: Text(result.exception.toString()),
+                              );
+                            }
+                            MaternityModel data = MaternityModel.fromJson(
+                                result.data!["findMaternityById"]);
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                _buildLabelText(
+                                    labelText: getLocalized(context, "age"),
+                                    labelValue: data.age.toString() ?? ""),
+                                _buildLabelText(
+                                    labelText: getLocalized(
+                                        context, "last_menstrual_date"),
+                                    labelValue: TimeFormateMethod()
+                                        .getTimeFormate(
+                                            time: data.lastMenstrualDate
+                                                .toString())),
+                                _buildLabelText(
+                                    labelText: getLocalized(context, "bmi"),
+                                    labelValue: data.bmi ?? "N/A"),
+                                _buildLabelText(
+                                    labelText: getLocalized(
+                                        context, "expected_date_of_delivery"),
+                                    labelValue: TimeFormateMethod()
+                                        .getTimeFormate(
+                                            time: data.expectedDateOfDelivery
+                                                .toString())),
+                                SizedBox(height: 20.h),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -117,7 +173,8 @@ query AllCalendar {
                             shape: BoxShape.circle,
                             color: Colors.grey,
                             image: DecorationImage(
-                              image:AssetImage("asset/images/User image (1).png"),
+                              image:
+                                  AssetImage("asset/images/User image (1).png"),
                             ),
                           ),
                         ),
@@ -157,7 +214,7 @@ query AllCalendar {
                 if (result.isLoading) {
                   return const Center(child: CustomLoader());
                 }
-              
+
                 List<AllCalendarModel> data = [];
                 result.data!["allCalendar"].forEach((element) {
                   data.add(AllCalendarModel.fromJson(element));
@@ -186,11 +243,7 @@ query AllCalendar {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              data[index].checkup ?? "",
-                              style: KtxtStyle().text17Blackw500,
-                            ),
-                            Text(
-                              data[index].note ?? "",
+                              data[index].weekNumber.toString(),
                               style: KtxtStyle().text17Blackw500,
                             ),
                             Text(
@@ -216,29 +269,54 @@ query AllCalendar {
             SizedBox(
               height: 20.h,
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30.w),
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColor.secondary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                  ),
-                  onPressed: () {
-                    sharePdf();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      getLocalized(
-                        context,
-                        "complete_pragnancy_calender_for_whatsapp",
+            Query(
+              options: QueryOptions(
+                document: gql(r'''query Query {
+  exportDataToCsv
+}'''),
+                onComplete: (data) {
+                  if (data != null) {
+                    print("pppppp ${data["exportDataToCsv"]}");
+                  }
+                },
+              ),
+              builder: (result, {fetchMore, refetch}) {
+                if (result.isLoading) {
+                  return Center(
+                    child: CustomLoader(),
+                  );
+                }
+                if (result.data == null) {
+                  return Center(
+                    child: Text('No Data Found'),
+                  );
+                }
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30.w),
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColor.secondary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                      style: KtxtStyle().text17Whitew700,
-                    ),
-                  )),
+                      onPressed: () {
+                        downloadAndShareFile(
+                            mediaUrl + result.data!["exportDataToCsv"]);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          getLocalized(
+                            context,
+                            "complete_pragnancy_calender_for_whatsapp",
+                          ),
+                          textAlign: TextAlign.center,
+                          style: KtxtStyle().text17Whitew700,
+                        ),
+                      )),
+                );
+              },
             ),
             SizedBox(
               height: 20.h,
@@ -249,8 +327,7 @@ query AllCalendar {
     );
   }
 
-   _buildLabelText(
-      {required String labelText, required String labelValue}) {
+  _buildLabelText({required String labelText, required String labelValue}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,

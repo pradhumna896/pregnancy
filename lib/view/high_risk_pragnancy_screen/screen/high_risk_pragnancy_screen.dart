@@ -53,292 +53,279 @@ mutation UpdateHighRisk($data: UpdateHighRiskDto!) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              const CustomTopBarWidget(title: "high_risk_pregnancy"),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 30.w),
-                child: Text(
-                  getLocalized(context, "click_check_box"),
-                  textAlign: TextAlign.center,
-                  style: KtxtStyle().text20DarkBlackw700,
-                ),
-              ),
-              SizedBox(
-                height: 20.h,
-              ),
-              Query(
-                options: QueryOptions(
-                  document: gql(allRisk),
-                  variables: {
-                    "findHighRiskByIdId":
-                        int.parse(SessionManager.getMaternityId().toString())
-                  },
-                  onComplete: (data) {
-                    print(data);
-                  },
-                  onError: (error) {
-                    if (error!.graphqlErrors[0].message == "Unauthorized") {
-                      authorized(context);
-                    }
-                  },
-                ),
-                builder: (result, {fetchMore, refetch}) {
-                  if (result.hasException) {
-                    return Text(result.exception!.graphqlErrors[0].message);
-                  }
-                  if (result.isLoading) {
-                    return const Center(child: CustomLoader());
-                  }
-                  return Expanded(
-                      child: Column(
-                    children: [
-                      Mutation(
-                        options: MutationOptions(
-                          document: gql(updateRisk),
-                          onCompleted: (data) {
-                            if (data != null) {
-                              print(data);
-                              showSuccessToast(
-                                toast,
-                                "Save data",
-                              );
-                            }
-                          },
-                        ),
-                        builder: (runMutation, check) {
-                          if (check!.isLoading) {
-                            return CustomLoader();
-                          }
-
-                          return CustomCheckbox(
-                              value: result.data!["findHighRiskById"]
-                                  ["severeAnemia"],
-                              onChanged: (p0) {
-                                runMutation({
-                                  "data": {
-                                    "teenagePregnancy":
-                                        result.data!["findHighRiskById"]
-                                            ["teenagePregnancy"],
-                                    "severeAnemia":
-                                        !result.data!["findHighRiskById"]
-                                            ["severeAnemia"],
-                                    "priorCaesareanOperation":
-                                        result.data!["findHighRiskById"]
-                                            ["priorCaesareanOperation"],
-                                    "maternityId":
-                                        result.data!["findHighRiskById"]
-                                            ["maternityId"],
-                                    "id": result.data!["findHighRiskById"]
-                                        ["id"],
-                                    "highBloodPressure":
-                                        result.data!["findHighRiskById"]
-                                            ["highBloodPressure"],
-                                    "gestationalDiabetes":
-                                        result.data!["findHighRiskById"]
-                                            ["gestationalDiabetes"]
-                                  }
-                                });
-                              },
-                              title: getLocalized(context, "severe_anemia"));
-                        },
-                      ),
-                      Mutation(
-                        options: MutationOptions(
-                          document: gql(updateRisk),
-                          onCompleted: (data) {
-                            if (data != null) {
-                              print(data);
-                              showSuccessToast(toast, "Save data");
-                            }
-                          },
-                        ),
-                        builder: (runMutation, check) {
-                          if (check!.isLoading) {
-                            return CustomLoader();
-                          }
-                          return CustomCheckbox(
-                              value: result.data!["findHighRiskById"]
-                                  ["highBloodPressure"],
-                              onChanged: (p0) {
-                                runMutation({
-                                  "data": {
-                                    "teenagePregnancy":
-                                        result.data!["findHighRiskById"]
-                                            ["teenagePregnancy"],
-                                    "severeAnemia":
-                                        result.data!["findHighRiskById"]
-                                            ["severeAnemia"],
-                                    "priorCaesareanOperation":
-                                        result.data!["findHighRiskById"]
-                                            ["priorCaesareanOperation"],
-                                    "maternityId":
-                                        result.data!["findHighRiskById"]
-                                            ["maternityId"],
-                                    "id": result.data!["findHighRiskById"]
-                                        ["id"],
-                                    "highBloodPressure":
-                                        !result.data!["findHighRiskById"]
-                                            ["highBloodPressure"],
-                                    "gestationalDiabetes":
-                                        result.data!["findHighRiskById"]
-                                            ["gestationalDiabetes"]
-                                  }
-                                });
-                              },
-                              title: getLocalized(
-                                  context, "pregnancy_induced_hypertension"));
-                        },
-                      ),
-                      Mutation(
-                        options: MutationOptions(
-                          document: gql(updateRisk),
-                          onCompleted: (data) {
-                            if (data != null) {
-                              print(data);
-                              showSuccessToast(toast, "Save data");
-                            }
-                          },
-                        ),
-                        builder: (runMutation, check) {
-                          if (check!.isLoading) {
-                            return CustomLoader();
-                          }
-                          return CustomCheckbox(
-                              value: result.data!["findHighRiskById"]
-                                  ["gestationalDiabetes"],
-                              onChanged: (p0) {
-                                runMutation({
-                                  "data": {
-                                    "teenagePregnancy":
-                                        result.data!["findHighRiskById"]
-                                            ["teenagePregnancy"],
-                                    "severeAnemia":
-                                        result.data!["findHighRiskById"]
-                                            ["severeAnemia"],
-                                    "priorCaesareanOperation":
-                                        result.data!["findHighRiskById"]
-                                            ["priorCaesareanOperation"],
-                                    "maternityId":
-                                        result.data!["findHighRiskById"]
-                                            ["maternityId"],
-                                    "id": result.data!["findHighRiskById"]
-                                        ["id"],
-                                    "highBloodPressure":
-                                        result.data!["findHighRiskById"]
-                                            ["highBloodPressure"],
-                                    "gestationalDiabetes":
-                                        !result.data!["findHighRiskById"]
-                                            ["gestationalDiabetes"]
-                                  }
-                                });
-                              },
-                              title: getLocalized(
-                                  context, "gestational_diabetes"));
-                        },
-                      ),
-                      Mutation(
-                        options: MutationOptions(
-                          document: gql(updateRisk),
-                          onCompleted: (data) {
-                            if (data != null) {
-                              print(data);
-                              showSuccessToast(toast, "Save data");
-                            }
-                          },
-                        ),
-                        builder: (runMutation, check) {
-                          if (check!.isLoading) {
-                            return CustomLoader();
-                          }
-                          return CustomCheckbox(
-                              value: result.data!["findHighRiskById"]
-                                  ["teenagePregnancy"],
-                              onChanged: (p0) {
-                                runMutation({
-                                  "data": {
-                                    "teenagePregnancy":
-                                        !result.data!["findHighRiskById"]
-                                            ["teenagePregnancy"],
-                                    "severeAnemia":
-                                        result.data!["findHighRiskById"]
-                                            ["severeAnemia"],
-                                    "priorCaesareanOperation":
-                                        result.data!["findHighRiskById"]
-                                            ["priorCaesareanOperation"],
-                                    "maternityId":
-                                        result.data!["findHighRiskById"]
-                                            ["maternityId"],
-                                    "id": result.data!["findHighRiskById"]
-                                        ["id"],
-                                    "highBloodPressure":
-                                        result.data!["findHighRiskById"]
-                                            ["highBloodPressure"],
-                                    "gestationalDiabetes":
-                                        result.data!["findHighRiskById"]
-                                            ["gestationalDiabetes"]
-                                  }
-                                });
-                              },
-                              title:
-                                  getLocalized(context, "teenage_pregnancy"));
-                        },
-                      ),
-                      Mutation(
-                        options: MutationOptions(
-                          document: gql(updateRisk),
-                          onCompleted: (data) {
-                            if (data != null) {
-                              print(data);
-                              showSuccessToast(toast, "Save data");
-                            }
-                          },
-                        ),
-                        builder: (runMutation, check) {
-                          if (check!.isLoading) {
-                            return CustomLoader();
-                          }
-                          return CustomCheckbox(
-                              value: result.data!["findHighRiskById"]
-                                  ["priorCaesareanOperation"],
-                              onChanged: (p0) {
-                                runMutation({
-                                  "data": {
-                                    "teenagePregnancy":
-                                        result.data!["findHighRiskById"]
-                                            ["teenagePregnancy"],
-                                    "severeAnemia":
-                                        result.data!["findHighRiskById"]
-                                            ["severeAnemia"],
-                                    "priorCaesareanOperation":
-                                        !result.data!["findHighRiskById"]
-                                            ["priorCaesareanOperation"],
-                                    "maternityId":
-                                        result.data!["findHighRiskById"]
-                                            ["maternityId"],
-                                    "id": result.data!["findHighRiskById"]
-                                        ["id"],
-                                    "highBloodPressure":
-                                        result.data!["findHighRiskById"]
-                                            ["highBloodPressure"],
-                                    "gestationalDiabetes":
-                                        result.data!["findHighRiskById"]
-                                            ["gestationalDiabetes"]
-                                  }
-                                });
-                              },
-                              title: getLocalized(
-                                  context, "prior_cesarean_operation"));
-                        },
-                      ),
-                    ],
-                  ));
-                },
-              )
-            ],
+          const CustomTopBarWidget(title: "high_risk_pregnancy"),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 30.w),
+            child: Text(
+              getLocalized(context, "click_check_box"),
+              textAlign: TextAlign.center,
+              style: KtxtStyle().text20DarkBlackw700,
+            ),
           ),
+          SizedBox(
+            height: 20.h,
+          ),
+          Query(
+            options: QueryOptions(
+              document: gql(allRisk),
+              variables: {
+                "findHighRiskByIdId":
+                    int.parse(SessionManager.getMaternityId().toString())
+              },
+              onComplete: (data) {
+                print(data);
+              },
+              onError: (error) {
+                if (error!.graphqlErrors[0].message == "Unauthorized") {
+                  authorized(context);
+                }
+              },
+            ),
+            builder: (result, {fetchMore, refetch}) {
+              if (result.hasException) {
+                return Text(result.exception!.graphqlErrors[0].message);
+              }
+              if (result.isLoading) {
+                return const Center(child: CustomLoader());
+              }
+              return Expanded(
+                  child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Mutation(
+                      options: MutationOptions(
+                        document: gql(updateRisk),
+                        onCompleted: (data) {
+                          if (data != null) {
+                            print(data);
+                            showSuccessToast(
+                              toast,
+                              "Save data",
+                            );
+                          }
+                        },
+                      ),
+                      builder: (runMutation, check) {
+                        if (check!.isLoading) {
+                          return CustomLoader();
+                        }
+
+                        return CustomCheckbox(
+                            value: result.data!["findHighRiskById"]
+                                ["severeAnemia"],
+                            onChanged: (p0) {
+                              runMutation({
+                                "data": {
+                                  "teenagePregnancy":
+                                      result.data!["findHighRiskById"]
+                                          ["teenagePregnancy"],
+                                  "severeAnemia":
+                                      !result.data!["findHighRiskById"]
+                                          ["severeAnemia"],
+                                  "priorCaesareanOperation":
+                                      result.data!["findHighRiskById"]
+                                          ["priorCaesareanOperation"],
+                                  "maternityId": result
+                                      .data!["findHighRiskById"]["maternityId"],
+                                  "id": result.data!["findHighRiskById"]["id"],
+                                  "highBloodPressure":
+                                      result.data!["findHighRiskById"]
+                                          ["highBloodPressure"],
+                                  "gestationalDiabetes":
+                                      result.data!["findHighRiskById"]
+                                          ["gestationalDiabetes"]
+                                }
+                              });
+                            },
+                            title: getLocalized(context, "severe_anemia"));
+                      },
+                    ),
+                    Mutation(
+                      options: MutationOptions(
+                        document: gql(updateRisk),
+                        onCompleted: (data) {
+                          if (data != null) {
+                            print(data);
+                            showSuccessToast(toast, "Save data");
+                          }
+                        },
+                      ),
+                      builder: (runMutation, check) {
+                        if (check!.isLoading) {
+                          return CustomLoader();
+                        }
+                        return CustomCheckbox(
+                            value: result.data!["findHighRiskById"]
+                                ["highBloodPressure"],
+                            onChanged: (p0) {
+                              runMutation({
+                                "data": {
+                                  "teenagePregnancy":
+                                      result.data!["findHighRiskById"]
+                                          ["teenagePregnancy"],
+                                  "severeAnemia":
+                                      result.data!["findHighRiskById"]
+                                          ["severeAnemia"],
+                                  "priorCaesareanOperation":
+                                      result.data!["findHighRiskById"]
+                                          ["priorCaesareanOperation"],
+                                  "maternityId": result
+                                      .data!["findHighRiskById"]["maternityId"],
+                                  "id": result.data!["findHighRiskById"]["id"],
+                                  "highBloodPressure":
+                                      !result.data!["findHighRiskById"]
+                                          ["highBloodPressure"],
+                                  "gestationalDiabetes":
+                                      result.data!["findHighRiskById"]
+                                          ["gestationalDiabetes"]
+                                }
+                              });
+                            },
+                            title: getLocalized(
+                                context, "pregnancy_induced_hypertension"));
+                      },
+                    ),
+                    Mutation(
+                      options: MutationOptions(
+                        document: gql(updateRisk),
+                        onCompleted: (data) {
+                          if (data != null) {
+                            print(data);
+                            showSuccessToast(toast, "Save data");
+                          }
+                        },
+                      ),
+                      builder: (runMutation, check) {
+                        if (check!.isLoading) {
+                          return CustomLoader();
+                        }
+                        return CustomCheckbox(
+                            value: result.data!["findHighRiskById"]
+                                ["gestationalDiabetes"],
+                            onChanged: (p0) {
+                              runMutation({
+                                "data": {
+                                  "teenagePregnancy":
+                                      result.data!["findHighRiskById"]
+                                          ["teenagePregnancy"],
+                                  "severeAnemia":
+                                      result.data!["findHighRiskById"]
+                                          ["severeAnemia"],
+                                  "priorCaesareanOperation":
+                                      result.data!["findHighRiskById"]
+                                          ["priorCaesareanOperation"],
+                                  "maternityId": result
+                                      .data!["findHighRiskById"]["maternityId"],
+                                  "id": result.data!["findHighRiskById"]["id"],
+                                  "highBloodPressure":
+                                      result.data!["findHighRiskById"]
+                                          ["highBloodPressure"],
+                                  "gestationalDiabetes":
+                                      !result.data!["findHighRiskById"]
+                                          ["gestationalDiabetes"]
+                                }
+                              });
+                            },
+                            title:
+                                getLocalized(context, "gestational_diabetes"));
+                      },
+                    ),
+                    Mutation(
+                      options: MutationOptions(
+                        document: gql(updateRisk),
+                        onCompleted: (data) {
+                          if (data != null) {
+                            print(data);
+                            showSuccessToast(toast, "Save data");
+                          }
+                        },
+                      ),
+                      builder: (runMutation, check) {
+                        if (check!.isLoading) {
+                          return CustomLoader();
+                        }
+                        return CustomCheckbox(
+                            value: result.data!["findHighRiskById"]
+                                ["teenagePregnancy"],
+                            onChanged: (p0) {
+                              runMutation({
+                                "data": {
+                                  "teenagePregnancy":
+                                      !result.data!["findHighRiskById"]
+                                          ["teenagePregnancy"],
+                                  "severeAnemia":
+                                      result.data!["findHighRiskById"]
+                                          ["severeAnemia"],
+                                  "priorCaesareanOperation":
+                                      result.data!["findHighRiskById"]
+                                          ["priorCaesareanOperation"],
+                                  "maternityId": result
+                                      .data!["findHighRiskById"]["maternityId"],
+                                  "id": result.data!["findHighRiskById"]["id"],
+                                  "highBloodPressure":
+                                      result.data!["findHighRiskById"]
+                                          ["highBloodPressure"],
+                                  "gestationalDiabetes":
+                                      result.data!["findHighRiskById"]
+                                          ["gestationalDiabetes"]
+                                }
+                              });
+                            },
+                            title: getLocalized(context, "teenage_pregnancy"));
+                      },
+                    ),
+                    Mutation(
+                      options: MutationOptions(
+                        document: gql(updateRisk),
+                        onCompleted: (data) {
+                          if (data != null) {
+                            print(data);
+                            showSuccessToast(toast, "Save data");
+                          }
+                        },
+                      ),
+                      builder: (runMutation, check) {
+                        if (check!.isLoading) {
+                          return CustomLoader();
+                        }
+                        return CustomCheckbox(
+                            value: result.data!["findHighRiskById"]
+                                ["priorCaesareanOperation"],
+                            onChanged: (p0) {
+                              runMutation({
+                                "data": {
+                                  "teenagePregnancy":
+                                      result.data!["findHighRiskById"]
+                                          ["teenagePregnancy"],
+                                  "severeAnemia":
+                                      result.data!["findHighRiskById"]
+                                          ["severeAnemia"],
+                                  "priorCaesareanOperation":
+                                      !result.data!["findHighRiskById"]
+                                          ["priorCaesareanOperation"],
+                                  "maternityId": result
+                                      .data!["findHighRiskById"]["maternityId"],
+                                  "id": result.data!["findHighRiskById"]["id"],
+                                  "highBloodPressure":
+                                      result.data!["findHighRiskById"]
+                                          ["highBloodPressure"],
+                                  "gestationalDiabetes":
+                                      result.data!["findHighRiskById"]
+                                          ["gestationalDiabetes"]
+                                }
+                              });
+                            },
+                            title: getLocalized(
+                                context, "prior_cesarean_operation"));
+                      },
+                    ),
+                  ],
+                ),
+              ));
+            },
+          )
         ],
       ),
     );
