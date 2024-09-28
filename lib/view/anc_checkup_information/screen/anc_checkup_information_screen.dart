@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pragnancy_app/comman/routes/routes.dart';
 import 'package:pragnancy_app/core/app_export.dart';
@@ -16,15 +17,13 @@ class AncCheckupInformationScreen extends StatefulWidget {
 
 class _AncCheckupInformationScreenState
     extends State<AncCheckupInformationScreen> {
-  List<TextEditingController> _weightControllers = [];
+  TextEditingController _weightControllers = TextEditingController();
 
-  List<TextEditingController> _bloodPressureControllers = [];
+  TextEditingController _bloodPressureControllers = TextEditingController();
 
-  List<TextEditingController> _hemoGlobinControllers = [];
+  TextEditingController _hemoGlobinControllers = TextEditingController();
 
-  List<TextEditingController> _testDateControllers = [];
-
-  TextEditingController dateSelect = TextEditingController();
+  TextEditingController _testDateControllers = TextEditingController();
 
   String ancCheckup = r'''
 query GetCheckupsByMaternityId($maternityId: Float!) {
@@ -60,22 +59,23 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
 }''';
   @override
   void initState() {
-    toast.init(context);
     super.initState();
+    toast.init(context);
   }
 
   @override
   void dispose() {
-    _weightControllers.forEach((controller) => controller.dispose());
-    _bloodPressureControllers.forEach((controller) => controller.dispose());
-    _hemoGlobinControllers.forEach((controller) => controller.dispose());
-    _testDateControllers.forEach((controller) => controller.dispose());
+    _weightControllers.dispose();
+    _bloodPressureControllers.dispose();
+    _hemoGlobinControllers.dispose();
+    _testDateControllers.dispose();
+
     super.dispose();
   }
 
-  List<GlobalKey<FormState>> formKeys = [];
+  final formKeys = GlobalKey<FormState>();
   bool isCompletedExpanded = false;
-  bool isNotCompletedExpanded = false;
+  bool isNotCompletedExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -136,42 +136,27 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                   children: List.generate(
                                 1,
                                 (index) {
-                                  _weightControllers = List.generate(
-                                      1,
-                                      (index) => TextEditingController(
-                                          text: notCompletedCheckups[index]
-                                                  ['weight']
-                                              .toString()));
-                                  _bloodPressureControllers = List.generate(
-                                      notCompletedCheckups.length,
-                                      (index) => TextEditingController(
-                                          text: notCompletedCheckups[index]
-                                                  ['bloodPressure'] ??
-                                              ""));
-                                  _hemoGlobinControllers = List.generate(
-                                      notCompletedCheckups.length,
-                                      (index) => TextEditingController(
-                                          text: notCompletedCheckups[index]
-                                                  ['hemoGlobin'] ??
-                                              ""));
-                                  _testDateControllers = List.generate(
-                                      notCompletedCheckups.length,
-                                      (index) => TextEditingController(
-                                          text: notCompletedCheckups[index]
-                                                      ['testDate'] !=
-                                                  null
-                                              ? TimeFormateMethod()
-                                                  .getTimeFormate(
-                                                      formate: "yyyy-MM-dd",
-                                                      time:
-                                                          notCompletedCheckups[
-                                                                      index]
-                                                                  ['testDate']
-                                                              .toString())
-                                              : ""));
-                                  formKeys = List.generate(
-                                      notCompletedCheckups.length,
-                                      (index) => GlobalKey<FormState>());
+                                  _weightControllers.text =
+                                      notCompletedCheckups[index]['weight']
+                                              .toString() ??
+                                          "";
+                                  _bloodPressureControllers.text =
+                                      notCompletedCheckups[index]
+                                              ['bloodPressure'] ??
+                                          "";
+                                  _hemoGlobinControllers.text =
+                                      notCompletedCheckups[index]
+                                              ["hemoGlobin"] ??
+                                          "";
+                                  _testDateControllers.text =
+                                      notCompletedCheckups[index]['testDate'] !=
+                                              null
+                                          ? TimeFormateMethod().getTimeFormate(
+                                              formate: "yyyy-MM-dd",
+                                              time: notCompletedCheckups[index]
+                                                      ['testDate']
+                                                  .toString())
+                                          : "";
 
                                   return Card(
                                     surfaceTintColor: const Color(0xFFF0F0F0),
@@ -181,7 +166,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 15.w, vertical: 10.h),
                                       child: Form(
-                                        key: formKeys[0],
+                                        key: formKeys,
                                         child: Column(
                                           children: [
                                             Text(
@@ -197,38 +182,30 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                 }
                                                 return null;
                                               },
-                                              controller: dateSelect,
+                                              controller: _testDateControllers,
                                               labelText:
                                                   getLocalized(context, "date"),
                                               labelStyle: KtxtStyle()
                                                   .text16DarkBlackw700,
                                               hintText: getLocalized(
                                                   context, "enter_your_date"),
-                                              onTap: notCompletedCheckups[index]
-                                                      ["isCompleted"]
-                                                  ? () {}
-                                                  : () async {
-                                                      DateTime? pickedDate =
-                                                          await showDatePicker(
-                                                        context: context,
-                                                        initialDate:
-                                                            DateTime.now(),
-                                                        firstDate:
-                                                            DateTime(2023),
-                                                        lastDate:
-                                                            DateTime(2050),
-                                                      );
-                                                      if (pickedDate != null) {
-                                                        String formattedDate =
-                                                            DateFormat(
-                                                                    'yyyy-MM-dd')
-                                                                .format(
-                                                                    pickedDate);
+                                              onTap: () async {
+                                                DateTime? pickedDate =
+                                                    await showDatePicker(
+                                                  context: context,
+                                                  initialDate: DateTime.now(),
+                                                  firstDate: DateTime(2023),
+                                                  lastDate: DateTime(2050),
+                                                );
+                                                if (pickedDate != null) {
+                                                  String formattedDate =
+                                                      DateFormat('yyyy-MM-dd')
+                                                          .format(pickedDate);
 
-                                                        dateSelect.text =
-                                                            formattedDate;
-                                                      }
-                                                    },
+                                                  _testDateControllers.text =
+                                                      formattedDate;
+                                                }
+                                              },
                                               readOnly: true,
                                               suffix: const Icon(
                                                   Icons.calendar_month),
@@ -245,8 +222,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                               readOnly:
                                                   notCompletedCheckups[index]
                                                       ["isCompleted"],
-                                              controller:
-                                                  _weightControllers[index],
+                                              controller: _weightControllers,
                                               labelText: getLocalized(
                                                   context, "weight"),
                                               hintText: getLocalized(
@@ -265,8 +241,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                   notCompletedCheckups[index]
                                                       ["isCompleted"],
                                               controller:
-                                                  _bloodPressureControllers[
-                                                      index],
+                                                  _bloodPressureControllers,
                                               labelText: getLocalized(
                                                   context, "blood_pressure"),
                                               hintText: getLocalized(context,
@@ -285,7 +260,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                   notCompletedCheckups[index]
                                                       ["isCompleted"],
                                               controller:
-                                                  _hemoGlobinControllers[index],
+                                                  _hemoGlobinControllers,
                                               labelText: getLocalized(
                                                   context, "hemoglobin"),
                                               hintText: getLocalized(context,
@@ -302,6 +277,12 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                     print(data);
                                                     showSuccessToast(toast,
                                                         "${notCompletedCheckups[index]["weekNumber"].toString()} A.N.C Checkup done");
+                                                    Navigator.pushReplacement(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              AncCheckupInformationScreen(),
+                                                        ));
                                                   }
                                                 },
                                                 onError: (error) {
@@ -331,7 +312,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                                     : AppColor
                                                                         .blue),
                                                             onTap: () {
-                                                              if (formKeys[0]
+                                                              if (formKeys
                                                                   .currentState!
                                                                   .validate()) {
                                                                 runMutation({
@@ -356,22 +337,20 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                                             index]
                                                                         ["id"],
                                                                     "hemoGlobin":
-                                                                        _hemoGlobinControllers[index]
+                                                                        _hemoGlobinControllers
                                                                             .text,
                                                                     "bloodPressure":
-                                                                        _bloodPressureControllers[index]
+                                                                        _bloodPressureControllers
                                                                             .text,
                                                                     "testDate":
-                                                                        _testDateControllers[index]
+                                                                        _testDateControllers
                                                                             .text,
                                                                     "weight":
-                                                                        _weightControllers[index]
+                                                                        _weightControllers
                                                                             .text
                                                                   }
                                                                 });
                                                               }
-                                                              dateSelect
-                                                                  .clear();
                                                             },
                                                             text: Text(
                                                               getLocalized(
@@ -405,40 +384,8 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                 children: List.generate(
                                   completedCheckups.length,
                                   (index) {
-                                    _weightControllers = List.generate(
-                                        completedCheckups.length,
-                                        (index) => TextEditingController(
-                                            text: completedCheckups[index]
-                                                    ['weight']
-                                                .toString()));
-                                    _bloodPressureControllers = List.generate(
-                                        completedCheckups.length,
-                                        (index) => TextEditingController(
-                                            text: completedCheckups[index]
-                                                    ['bloodPressure'] ??
-                                                ""));
-                                    _hemoGlobinControllers = List.generate(
-                                        completedCheckups.length,
-                                        (index) => TextEditingController(
-                                            text: completedCheckups[index]
-                                                    ['hemoGlobin'] ??
-                                                ""));
-                                    _testDateControllers = List.generate(
-                                        completedCheckups.length,
-                                        (index) => TextEditingController(
-                                            text: completedCheckups[index]
-                                                        ['testDate'] !=
-                                                    null
-                                                ? TimeFormateMethod()
-                                                    .getTimeFormate(
-                                                        formate: "yyyy-MM-dd",
-                                                        time: completedCheckups[
-                                                                    index]
-                                                                ['testDate']
-                                                            .toString())
-                                                : ""));
-
                                     return Card(
+                                      elevation: 3,
                                       surfaceTintColor: const Color(0xFFF0F0F0),
                                       margin: EdgeInsets.symmetric(
                                           horizontal: 25.w, vertical: 10),
@@ -453,156 +400,31 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                               style: KtxtStyle()
                                                   .text20DarkBlackw700,
                                             ),
-                                            CustomTextFormField(
-                                              validator: (value) {
-                                                if (value!.isEmpty) {
-                                                  return "please select date";
-                                                }
-                                                return null;
-                                              },
-                                              controller:
-                                                  _testDateControllers[index],
-                                              labelText:
-                                                  getLocalized(context, "date"),
-                                              labelStyle: KtxtStyle()
-                                                  .text16DarkBlackw700,
-                                              hintText: getLocalized(
-                                                  context, "enter_your_date"),
-                                              onTap: completedCheckups[index]
-                                                      ["isCompleted"]
-                                                  ? () {}
-                                                  : () async {
-                                                      DateTime? pickedDate =
-                                                          await showDatePicker(
-                                                        context: context,
-                                                        initialDate:
-                                                            DateTime.now(),
-                                                        firstDate:
-                                                            DateTime(2023),
-                                                        lastDate:
-                                                            DateTime(2050),
-                                                      );
-                                                      if (pickedDate != null) {
-                                                        String formattedDate =
-                                                            DateFormat(
-                                                                    'yyyy-MM-dd')
-                                                                .format(
-                                                                    pickedDate);
-
-                                                        _testDateControllers[
-                                                                    index]
-                                                                .text =
-                                                            formattedDate;
-                                                      }
-                                                    },
-                                              readOnly: true,
-                                              suffix: const Icon(
-                                                  Icons.calendar_month),
+                                            CustomListTileWidget(
+                                              title: "date",
+                                              value: TimeFormateMethod()
+                                                  .getTimeFormate(
+                                                      formate: "yyyy-MM-dd",
+                                                      time: completedCheckups[
+                                                          index]['testDate']),
                                             ),
-                                            SizedBox(
-                                              height: 10.h,
+                                            CustomListTileWidget(
+                                              title: "weight",
+                                              value: completedCheckups[index]
+                                                  ['weight'],
                                             ),
-                                            CustomTextFormField(
-                                              validator: (value) {
-                                                if (value!.isEmpty) {
-                                                  return "please Ecnter weight";
-                                                }
-                                              },
-                                              readOnly: completedCheckups[index]
-                                                  ["isCompleted"],
-                                              controller:
-                                                  _weightControllers[index],
-                                              labelText: getLocalized(
-                                                  context, "weight"),
-                                              hintText: getLocalized(
-                                                  context, "enter_your_weight"),
+                                            CustomListTileWidget(
+                                              title: "blood_pressure",
+                                              value: completedCheckups[index]
+                                                      ['bloodPressure'] ??
+                                                  "",
                                             ),
-                                            SizedBox(
-                                              height: 10.h,
+                                            CustomListTileWidget(
+                                              title: "hemoglobin",
+                                              value: completedCheckups[index]
+                                                      ['hemoGlobin'] ??
+                                                  "",
                                             ),
-                                            CustomTextFormField(
-                                              validator: (value) {
-                                                if (value!.isEmpty) {
-                                                  return "please Ecnter blood pressure";
-                                                }
-                                              },
-                                              readOnly: completedCheckups[index]
-                                                  ["isCompleted"],
-                                              controller:
-                                                  _bloodPressureControllers[
-                                                      index],
-                                              labelText: getLocalized(
-                                                  context, "blood_pressure"),
-                                              hintText: getLocalized(context,
-                                                  "enter_your_blood_pressure"),
-                                            ),
-                                            SizedBox(
-                                              height: 10.h,
-                                            ),
-                                            CustomTextFormField(
-                                              validator: (value) {
-                                                if (value!.isEmpty) {
-                                                  return "please Ecnter hemoglobin";
-                                                }
-                                              },
-                                              readOnly: completedCheckups[index]
-                                                  ["isCompleted"],
-                                              controller:
-                                                  _hemoGlobinControllers[index],
-                                              labelText: getLocalized(
-                                                  context, "hemoglobin"),
-                                              hintText: getLocalized(context,
-                                                  "enter_your_hemoglobin"),
-                                            ),
-                                            SizedBox(
-                                              height: 10.h,
-                                            ),
-                                            Mutation(
-                                              options: MutationOptions(
-                                                document: gql(updateAncCheckup),
-                                                onCompleted: (data) {
-                                                  if (data != null) {
-                                                    print(data);
-                                                    showSuccessToast(toast,
-                                                        "${completedCheckups[index]["weekNumber"].toString()} A.N.C Checkup done");
-                                                  }
-                                                },
-                                                onError: (error) {
-                                                  showErrorToast(
-                                                    toast,
-                                                    error!.graphqlErrors[0]
-                                                        .message,
-                                                  );
-                                                },
-                                              ),
-                                              builder: (runMutation, result) {
-                                                return result!.isLoading
-                                                    ? CustomLoader()
-                                                    : completedCheckups[index][
-                                                            "isCompleted"]
-                                                        ? Container()
-                                                        : CustomElevatedButton(
-                                                            buttonStyle: ElevatedButton.styleFrom(
-                                                                backgroundColor: completedCheckups[
-                                                                            index]
-                                                                        [
-                                                                        "isCompleted"]
-                                                                    ? AppColor
-                                                                        .blue
-                                                                        .withOpacity(
-                                                                            0.1)
-                                                                    : AppColor
-                                                                        .blue),
-                                                            onTap: () {},
-                                                            text: Text(
-                                                              getLocalized(
-                                                                  context,
-                                                                  "done"),
-                                                              style: KtxtStyle()
-                                                                  .text20Primary600,
-                                                            ));
-                                              },
-                                            )
                                           ],
                                         ),
                                       ),
@@ -631,6 +453,42 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
               })
         ],
       ),
+    );
+  }
+}
+
+class CustomListTileWidget extends StatelessWidget {
+  String title;
+  String value;
+  CustomListTileWidget({
+    super.key,
+    required this.title,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+            child: Text(
+          getLocalized(context, title),
+          style: KtxtStyle().text16DarkBlackw700,
+        )),
+        Text(
+          ":",
+          style: KtxtStyle().text16DarkBlackw700,
+        ),
+        Expanded(
+            child: Container(
+          alignment: Alignment.bottomRight,
+          child: Text(
+            value,
+            style: KtxtStyle().text16DarkBlackw700,
+          ),
+        )),
+      ],
     );
   }
 }

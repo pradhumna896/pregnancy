@@ -109,7 +109,7 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                               },
                               variables: {
                                 "findMaternityByIdId": int.parse(
-                                    SessionManager.getUserId().toString())
+                                    SessionManager.getMaternityId().toString())
                               }),
                           builder: (result, {fetchMore, refetch}) {
                             if (result.isLoading) {
