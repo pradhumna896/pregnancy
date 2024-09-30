@@ -47,7 +47,6 @@ class MaternityInfoScreen extends StatelessWidget {
                 if (result.hasException) {
                   return Text(result.exception!.graphqlErrors[0].message);
                 }
-        
                 if (result.isLoading) {
                   return const Center(child: CustomLoader());
                 }

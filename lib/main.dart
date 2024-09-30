@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,11 +9,17 @@ import 'package:pragnancy_app/bloc/localization/localization_event.dart';
 import 'package:pragnancy_app/bloc/localization/localization_state.dart';
 import 'package:pragnancy_app/comman/routes/pages.dart';
 import 'package:pragnancy_app/core/constants/session_manager.dart';
-
+import 'package:pragnancy_app/data/firebase_service.dart';
+import 'package:pragnancy_app/firebase_options.dart';
+final navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await SessionManager.init();
   await initHiveForFlutter();
+  await FirebaseApi().initNotification();
 
   final HttpLink httpLink = HttpLink(
     'https://demo5.nrt.co.in/graphql',
@@ -66,6 +73,7 @@ class _MyAppState extends State<MyApp> {
                   useMaterial3: true,
                 ),
                 onGenerateRoute: AppPages.generateRouteSetting,
+                 navigatorKey: navigatorKey,
               );
             },
           ),
