@@ -14,17 +14,13 @@ import 'package:pragnancy_app/firebase_options.dart';
 final navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await SessionManager.init();
   await initHiveForFlutter();
   await FirebaseApi().initNotification();
-
   final HttpLink httpLink = HttpLink(
     'https://demo5.nrt.co.in/graphql',
   );
-
   final AuthLink authLink = AuthLink(
     getToken: () async => 'Bearer ${SessionManager.getToken()}',
   );
@@ -37,8 +33,7 @@ void main() async {
       cache: GraphQLCache(store: HiveStore()),
     ),
   );
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((_) {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
     runApp(MyApp(
       client: client,
     ));

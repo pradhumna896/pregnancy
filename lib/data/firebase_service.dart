@@ -28,8 +28,7 @@ class FirebaseApi {
   }
 
   Future initPushNotification() async {
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
@@ -84,7 +83,6 @@ class FirebaseApi {
     final fCMToken = await _firebaseMessaging.getToken();
     fcmTokenCode = fCMToken;
     print('FCM Token: $fCMToken');
-
     initPushNotification();
     initLocalNotification();
   }
