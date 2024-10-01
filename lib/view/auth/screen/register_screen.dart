@@ -1,10 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pragnancy_app/comman/routes/routes.dart';
+import 'package:pragnancy_app/data/state.dart';
 import 'package:pragnancy_app/utils/custom_toast.dart';
 import 'package:pragnancy_app/utils/time_formate_methode.dart';
 import 'package:pragnancy_app/view/auth/screen/login_screen.dart';
 import 'package:pragnancy_app/view/settings/screen/settings_screen.dart';
+import 'package:pragnancy_app/widgets/custom_drodown.dart';
 import 'package:pragnancy_app/widgets/custom_loader.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -24,6 +26,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController heightController = TextEditingController();
   TextEditingController weightController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  String? selectState;
+  String? selectCity;
+  List<String> districtList = [];
 
   String register = r'''
 mutation Register($registerData: RegisterDto!) {
@@ -232,7 +237,34 @@ mutation Register($registerData: RegisterDto!) {
                             getLocalized(context, "last_menstrual_start_date"),
                       ),
                       SizedBox(
-                        height: 20.h,
+                        height: 10.h,
+                      ),
+                      CustomDropdown(
+                        labelText: "State",
+                        listName: state.map((e) {
+                          return e["state"].toString();
+                        }).toList(),
+                        onChng: (p0) {
+                          selectState = p0;
+                          for (var i in state) {
+                            if (i["state"] == selectState) {
+                              setState(() {
+                                districtList = i["districts"];
+                              });
+                            }
+                          }
+                        },
+                      ),
+                      if (selectState != null)
+                        CustomDropdown(
+                          labelText: "District",
+                          listName: districtList,
+                          onChng: (p0) {
+                            
+                          },
+                        ),
+                      SizedBox(
+                        height: 20,
                       ),
                       Mutation(
                         options: MutationOptions(

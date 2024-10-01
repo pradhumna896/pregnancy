@@ -119,7 +119,6 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                           dividerColor: AppColor.secondary,
                           expandedHeaderPadding: EdgeInsets.zero,
                           expandIconColor: Colors.white,
-                          
                           elevation: 1,
                           children: [
                             ExpansionPanel(
