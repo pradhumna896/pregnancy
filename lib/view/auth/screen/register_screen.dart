@@ -156,6 +156,7 @@ mutation Register($registerData: RegisterDto!) {
                             return getLocalized(
                                 context, "Please enter your mobile");
                           }
+                          return null;
                         },
                         readOnly: widget.title == "edit_profile",
                         controller: mobileController,
@@ -171,6 +172,7 @@ mutation Register($registerData: RegisterDto!) {
                             return getLocalized(
                                 context, "Please enter your age");
                           }
+                          return null;
                         },
                         controller: ageController,
                         hintText: getLocalized(context, "enter_age"),
@@ -185,6 +187,7 @@ mutation Register($registerData: RegisterDto!) {
                             return getLocalized(
                                 context, "Please enter your height");
                           }
+                          return null;
                         },
                         controller: heightController,
                         hintText: getLocalized(context, "enter_your_height"),
@@ -199,6 +202,7 @@ mutation Register($registerData: RegisterDto!) {
                             return getLocalized(
                                 context, "Please enter your weight");
                           }
+                          return null;
                         },
                         controller: weightController,
                         hintText: getLocalized(context, "enter_your_weight"),
