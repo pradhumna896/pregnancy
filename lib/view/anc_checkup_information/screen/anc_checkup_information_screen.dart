@@ -1,8 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pragnancy_app/comman/routes/routes.dart';
-import 'package:pragnancy_app/core/app_export.dart';
 import 'package:pragnancy_app/utils/custom_toast.dart';
 import 'package:pragnancy_app/utils/time_formate_methode.dart';
 import 'package:pragnancy_app/widgets/custom_loader.dart';
@@ -17,13 +15,14 @@ class AncCheckupInformationScreen extends StatefulWidget {
 
 class _AncCheckupInformationScreenState
     extends State<AncCheckupInformationScreen> {
-  TextEditingController _weightControllers = TextEditingController();
+  final TextEditingController _weightControllers = TextEditingController();
 
-  TextEditingController _bloodPressureControllers = TextEditingController();
+  final TextEditingController _bloodPressureControllers =
+      TextEditingController();
 
-  TextEditingController _hemoGlobinControllers = TextEditingController();
+  final TextEditingController _hemoGlobinControllers = TextEditingController();
 
-  TextEditingController _testDateControllers = TextEditingController();
+  final TextEditingController _testDateControllers = TextEditingController();
 
   String ancCheckup = r'''
 query GetCheckupsByMaternityId($maternityId: Float!) {
@@ -120,6 +119,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                           dividerColor: AppColor.secondary,
                           expandedHeaderPadding: EdgeInsets.zero,
                           expandIconColor: Colors.white,
+                          
                           elevation: 1,
                           children: [
                             ExpansionPanel(
@@ -218,6 +218,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                 if (value!.isEmpty) {
                                                   return "please Ecnter weight";
                                                 }
+                                                return null;
                                               },
                                               readOnly:
                                                   notCompletedCheckups[index]
@@ -236,6 +237,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                 if (value!.isEmpty) {
                                                   return "please Ecnter blood pressure";
                                                 }
+                                                return null;
                                               },
                                               readOnly:
                                                   notCompletedCheckups[index]
@@ -255,6 +257,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                 if (value!.isEmpty) {
                                                   return "please Ecnter hemoglobin";
                                                 }
+                                                return null;
                                               },
                                               readOnly:
                                                   notCompletedCheckups[index]
@@ -278,11 +281,12 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                                     showSuccessToast(toast,
                                                         "${notCompletedCheckups[index]["weekNumber"].toString()} A.N.C Checkup done");
                                                     Navigator.pushReplacement(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              AncCheckupInformationScreen(),
-                                                        ));
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            AncCheckupInformationScreen(),
+                                                      ),
+                                                    );
                                                   }
                                                 },
                                                 onError: (error) {

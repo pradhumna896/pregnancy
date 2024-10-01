@@ -11,6 +11,7 @@ import 'package:pragnancy_app/comman/routes/pages.dart';
 import 'package:pragnancy_app/core/constants/session_manager.dart';
 import 'package:pragnancy_app/data/firebase_service.dart';
 import 'package:pragnancy_app/firebase_options.dart';
+
 final navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +34,8 @@ void main() async {
       cache: GraphQLCache(store: HiveStore()),
     ),
   );
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
     runApp(MyApp(
       client: client,
     ));
@@ -68,7 +70,7 @@ class _MyAppState extends State<MyApp> {
                   useMaterial3: true,
                 ),
                 onGenerateRoute: AppPages.generateRouteSetting,
-                 navigatorKey: navigatorKey,
+                navigatorKey: navigatorKey,
               );
             },
           ),
