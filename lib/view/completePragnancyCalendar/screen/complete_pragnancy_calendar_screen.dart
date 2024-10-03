@@ -219,40 +219,15 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                     padding: EdgeInsets.only(top: 10),
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 30.w),
-                        padding: EdgeInsets.all(20.w),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                            color: Color(0xffD6D0D0),
-                            borderRadius: BorderRadius.circular(10.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 0,
-                                blurRadius: 11,
-                                offset: Offset(4, 4),
-                              )
-                            ]),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              data[index].weekNumber.toString(),
-                              style: KtxtStyle().text17Blackw500,
-                            ),
-                            Text(
-                              data[index].description ?? "",
-                              style: KtxtStyle().text17Blackw500,
-                            ),
-                            Text(
-                              TimeFormateMethod().getTimeFormate(
-                                  formate: "EEEE-dd/MM/yyyy",
-                                  time: data[index].testDate.toString()),
-                              style: KtxtStyle().text17Blackw500,
-                            ),
-                          ],
-                        ),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 5),
+                        child: TestCard(
+                            weekNumber: data[index].weekNumber!,
+                            testDate: TimeFormateMethod().getTimeFormate(
+                                formate: "EEEE-dd/MM/yyyy",
+                                time: data[index].testDate.toString()),
+                            description: data[index].description!),
                       );
                     },
                     separatorBuilder: (context, index) {
@@ -267,8 +242,8 @@ query FindMaternityById($findMaternityByIdId: Float!) {
             Query(
               options: QueryOptions(
                 document: gql(r'''query Query {
-  exportDataToCsv
-}'''),
+                        exportDataToCsv
+                     }'''),
                 onComplete: (data) {
                   if (data != null) {
                     print("pppppp ${data["exportDataToCsv"]}");
@@ -354,6 +329,59 @@ query FindMaternityById($findMaternityByIdId: Float!) {
           ),
         ),
       ],
+    );
+  }
+}
+
+class TestCard extends StatelessWidget {
+  final int weekNumber;
+  final String testDate;
+  final String description;
+
+  const TestCard({
+    Key? key,
+    required this.weekNumber,
+    required this.testDate,
+    required this.description,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Week $weekNumber',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Test Date: $testDate',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[700],
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
