@@ -217,6 +217,7 @@ mutation Register($registerData: RegisterDto!) {
                             return getLocalized(
                                 context, "Please enter your date");
                           }
+                          return null;
                         },
                         controller: dateController,
                         onTap: () async {
