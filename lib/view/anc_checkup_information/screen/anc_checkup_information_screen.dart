@@ -137,8 +137,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                 (index) {
                                   _weightControllers.text =
                                       notCompletedCheckups[index]['weight']
-                                              .toString() ??
-                                          "";
+                                              .toString();
                                   _bloodPressureControllers.text =
                                       notCompletedCheckups[index]
                                               ['bloodPressure'] ??
