@@ -94,7 +94,6 @@ mutation Register($registerData: RegisterDto!) {
         toast.init(context);
       },
     );
-
     if (widget.title == "edit_profile") getData();
     super.initState();
   }

@@ -125,6 +125,11 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                               backgroundColor: AppColor.secondary,
                               headerBuilder: (context, isExpanded) {
                                 return ListTile(
+                                  onTap: () {
+                                  setState(() {
+                                      isNotCompletedExpanded =!isNotCompletedExpanded;
+                                  });
+                                  },
                                   title: Text(
                                     "Not Completed Checkups",
                                     style: KtxtStyle().text16DarkWhitew600,
@@ -376,6 +381,11 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                               backgroundColor: AppColor.secondary,
                               headerBuilder: (context, isExpanded) {
                                 return ListTile(
+                                  onTap: () {
+                                    setState(() {
+                                      isCompletedExpanded = !isCompletedExpanded;
+                                    });
+                                  },
                                   title: Text(
                                     "Completed Checkups",
                                     style: KtxtStyle().text16DarkWhitew600,
