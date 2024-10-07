@@ -49,6 +49,15 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  List<CardModel> patientList = [
+   CardModel(
+      title: "Patient",
+      imagePath: "asset/images/highRisk.png",
+      gradient: AppGradient().highRiskPragnancyGradient,
+      page: HighRiskPragnancyScreen(),
+    ),
+  ];
+
   List<CardModel> cardList = [
     CardModel(
       title: "maternity_information",
@@ -72,13 +81,13 @@ class HomeScreen extends StatelessWidget {
       title: "anc_checkup",
       imagePath: "asset/images/anc_checkup.png",
       gradient: AppGradient().ancCheckupGradient,
-      page:  AncCheckupInformationScreen(),
+      page: AncCheckupInformationScreen(),
     ),
     CardModel(
       title: "schemes_for_pregnant_women",
       imagePath: "asset/images/scheme_for_pragnent.png",
       gradient: AppGradient().schemeGradient,
-      page:  SchemForPragnantWomen(),
+      page: SchemForPragnantWomen(),
     ),
   ];
 }

@@ -64,5 +64,9 @@
     "pregnancy_induced_hypertension":"गर्भवस्था प्रेरित हाई ब्लड प्रेशर (पी.आई.एच)",
     "gestational_diabetes":"गर्भकालीन मधुमेह (जेस्टेशनल डायबिटीज)",
     "teenage_pregnancy":"किशोर गर्भवस्था",
-    "prior_cesarean_operation":"पूर्व सिजेरियन ऑपरेशन"
+    "prior_cesarean_operation":"पूर्व सिजेरियन ऑपरेशन",
+    "state":"राज्य",
+    "district":"जिला",
+    "city":"शहर",
+    "tehsil":"तहसील"
 }

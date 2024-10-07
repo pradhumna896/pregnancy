@@ -1,5 +1,6 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pragnancy_app/comman/routes/routes.dart';
+import 'package:pragnancy_app/data/operations.dart';
 import 'package:pragnancy_app/utils/custom_toast.dart';
 import 'package:pragnancy_app/view/auth/screen/register_screen.dart';
 import 'dart:async';
@@ -79,33 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   final formKey = GlobalKey<FormState>();
-  String otpRequest = r'''
- mutation RequestOtp($otpRequestData: OtpRequestDto!) {
-  requestOtp(otpRequestData: $otpRequestData){
-    otp
-  }
-}
-  ''';
-  String login = r'''
-  mutation Login($loginData: LoginDto!) {
-  login(loginData: $loginData) {
-    accessToken
-    user {
-      age
-      createdAt
-      email
-      height
-      id
-      lastMenstrualDate
-      mobileNo
-      name
-      updatedAt
-      weight
-      maternityId
-    }
-  }
-}
-   ''';
+ 
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -165,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             showErrorToast(
                                 toast, error!.graphqlErrors[0].message);
                           },
-                          document: gql(otpRequest)),
+                          document: gql(Operations.otpRequest)),
                       builder: (runMutation, result) {
                         result!.data == null
                                 ?otpController.text = ""
@@ -242,7 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (_isSending)
                               Mutation(
                                 options: MutationOptions(
-                                  document: gql(login),
+                                  document: gql(Operations.login),
                                   onCompleted: (data) {
                                     if (data != null) {
                                       print(data);

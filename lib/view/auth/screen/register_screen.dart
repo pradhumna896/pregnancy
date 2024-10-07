@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pragnancy_app/comman/routes/routes.dart';
+import 'package:pragnancy_app/data/operations.dart';
 import 'package:pragnancy_app/data/state.dart';
 import 'package:pragnancy_app/utils/custom_toast.dart';
 import 'package:pragnancy_app/utils/time_formate_methode.dart';
@@ -26,67 +27,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController heightController = TextEditingController();
   TextEditingController weightController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  TextEditingController cityController = TextEditingController();
+  TextEditingController tehsilController = TextEditingController();
   String? selectState;
-  String? selectCity;
+  String? selectDistrict;
   List<String> districtList = [];
 
-  String register = r'''
-mutation Register($registerData: RegisterDto!) {
-  register(registerData: $registerData) {
-    id
-    name
-    mobileNo
-    email
-    age
-    height
-    weight
-    lastMenstrualDate
-    createdAt
-    updatedAt
-    isLoggedIn
-  }
-}
-''';
-  String addFamilyMember =
-      r'''mutation CreateFamilyMember($createUserDto: CreateUserDto!) {
-  createFamilyMember(createUserDto: $createUserDto) {
-    id
-    name
-    mobileNo
-    email
-    age
-    height
-    weight
-    isLoggedIn
-    lastMenstrualDate
-    createdBy
-    role
-    createdAt
-    updatedAt
-    parentId
-    maternityId
-  }
-}''';
-
-  String editProfile = r'''mutation EditProfile($data: UpdateUserDto!) {
-  editProfile(data: $data) {
-    id
-    name
-    mobileNo
-    email
-    age
-    height
-    weight
-    isLoggedIn
-    lastMenstrualDate
-    createdBy
-    role
-    createdAt
-    updatedAt
-    parentId
-    maternityId
-  }
-}''';
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
@@ -94,6 +40,7 @@ mutation Register($registerData: RegisterDto!) {
         toast.init(context);
       },
     );
+
     if (widget.title == "edit_profile") getData();
     super.initState();
   }
@@ -244,7 +191,13 @@ mutation Register($registerData: RegisterDto!) {
                         height: 10.h,
                       ),
                       CustomDropdown(
-                        labelText: "State",
+                        validator: (p0) {
+                          if (p0 == null) {
+                            return "please select state";
+                          }
+                          return null;
+                        },
+                        labelText: getLocalized(context, "state"),
                         listName: state.map((e) {
                           return e["state"].toString();
                         }).toList(),
@@ -261,22 +214,58 @@ mutation Register($registerData: RegisterDto!) {
                       ),
                       if (selectState != null)
                         CustomDropdown(
-                          labelText: "District",
+                          validator: (p0) {
+                            if (p0 == null) {
+                              return "please select district";
+                            }
+                            return null;
+                          },
+                          labelText: getLocalized(context, "district"),
                           listName: districtList,
                           onChng: (p0) {
-                            
+                            selectDistrict = p0;
                           },
                         ),
                       SizedBox(
                         height: 20,
                       ),
+                      CustomTextFormField(
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return getLocalized(
+                                context, "Please enter your city");
+                          }
+                          return null;
+                        },
+                        controller: cityController,
+                        hintText: getLocalized(context, "enter_your_city"),
+                        labelText: getLocalized(context, "city"),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      CustomTextFormField(
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return getLocalized(
+                                context, "Please enter your tehsil");
+                          }
+                          return null;
+                        },
+                        controller: tehsilController,
+                        hintText: getLocalized(context, "enter_your_tehsil"),
+                        labelText: getLocalized(context, "tehsil"),
+                      ),
+                      SizedBox(
+                        height: 20.h,
+                      ),
                       Mutation(
                         options: MutationOptions(
                           document: gql(widget.title == "add_family_members"
-                              ? addFamilyMember
+                              ? Operations.addFamilyMember
                               : widget.title == "edit_profile"
-                                  ? editProfile
-                                  : register),
+                                  ? Operations.editProfile
+                                  : Operations.register),
                           onCompleted: (resultData) {
                             if (resultData != null) {
                               showSuccessToast(
@@ -303,6 +292,7 @@ mutation Register($registerData: RegisterDto!) {
                           onError: (error) {
                             showErrorToast(
                                 toast, error!.graphqlErrors[0].message);
+                            print("object ${error!.graphqlErrors[0].message}");
                           },
                         ),
                         builder:
@@ -360,11 +350,14 @@ mutation Register($registerData: RegisterDto!) {
                                                         widget.user["id"],
                                                     "weight":
                                                         weightController.text,
-                                                    "role": "user",
                                                     "maternityId": int.parse(
                                                         SessionManager
                                                                 .getMaternityId()
-                                                            .toString())
+                                                            .toString()),
+                                                    "state": selectState,
+                                                    "tehsil": tehsilController.text,
+                                                    "userType": "patient",
+                                                    "city": cityController.text
                                                   }
                                                 })
                                               : runMutation({
@@ -382,11 +375,18 @@ mutation Register($registerData: RegisterDto!) {
                                                     "weight": weightController
                                                         .text
                                                         .trim(),
-                                                    "role": "user",
                                                     "lastMenstrualDate":
                                                         dateController.text
                                                             .trim(),
                                                     "isLoggedIn": false,
+                                                    "city": cityController.text
+                                                        .trim(),
+                                                    "district": selectDistrict,
+                                                    "state": selectState,
+                                                    "tehsil": tehsilController
+                                                        .text
+                                                        .trim(),
+                                                    "userType": "patient"
                                                   }
                                                 });
                                     }

@@ -3,6 +3,7 @@ import 'package:pragnancy_app/bloc/localization/localization_bloc.dart';
 import 'package:pragnancy_app/bloc/localization/localization_event.dart';
 import 'package:pragnancy_app/bloc/localization/localization_state.dart';
 import 'package:pragnancy_app/core/error_handler.dart';
+import 'package:pragnancy_app/data/operations.dart';
 import 'package:pragnancy_app/view/about/screen/about_screen.dart';
 import 'package:pragnancy_app/view/auth/screen/register_screen.dart';
 import 'package:pragnancy_app/view/faq/screen/faq_screen.dart';
@@ -30,12 +31,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     isLoggedIn
     lastMenstrualDate
     createdBy
-    role
     createdAt
     updatedAt
+    userType
+    slug
+
     parentId
+    superParentId
+    state
+    district
+    city
+    tehsil
+    maternityId
   }
-} ''';
+}''';
 
   @override
   Widget build(BuildContext context) {
@@ -243,31 +252,12 @@ class ShowCustomModelBottomSheet extends StatelessWidget {
     super.key,
     required this.parentId,
   });
-  String getFamily = r'''
-query GetFamilyMembers($parentId: Int!) {
-  getFamilyMembers(parentId: $parentId) {
-    id
-    name
-    mobileNo
-    email
-    age
-    height
-    weight
-    isLoggedIn
-    lastMenstrualDate
-    createdBy
-    role
-    createdAt
-    updatedAt
-    parentId
-  }
-}
-''';
+ 
   @override
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        document: gql(getFamily),
+        document: gql(Operations.getFamily),
         variables: {"parentId": parentId},
         onError: (error) {
           if (error!.graphqlErrors[0].message == "Unauthorized") {

@@ -1,5 +1,6 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pragnancy_app/core/error_handler.dart';
+import 'package:pragnancy_app/data/operations.dart';
 import 'package:pragnancy_app/utils/time_formate_methode.dart';
 import 'package:pragnancy_app/view/maternity/model/maternity_model.dart';
 import 'package:pragnancy_app/widgets/custom_loader.dart';
@@ -7,21 +8,8 @@ import '../../../comman/routes/routes.dart';
 
 // ignore: must_be_immutable
 class MaternityInfoScreen extends StatelessWidget {
-  MaternityInfoScreen({super.key});
-  String maternity = r'''query FindMaternityById($findMaternityByIdId: Float!) {
-  findMaternityById(id: $findMaternityByIdId) {
-    id
-    name
-    age
-    bmi
-    pregnancyRisk
-    expectedDateOfDelivery
-    lastMenstrualDate
-    createdAt
-    updatedAt
-    userId
-  }
-} ''';
+  const MaternityInfoScreen({super.key});
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,13 +20,14 @@ class MaternityInfoScreen extends StatelessWidget {
             CustomTopBarWidget(title: "maternity_information"),
             Query(
               options: QueryOptions(
-                document: gql(maternity),
+                document: gql(Operations.maternity),
                 variables: {
                   "findMaternityByIdId":
                       int.parse(SessionManager.getMaternityId().toString())
                 },
                 onError: (error) {
-                  if (error!.graphqlErrors[0].message == "Unauthorized") {
+                  print(error!.graphqlErrors[0].message);
+                  if (error.graphqlErrors[0].message == "Unauthorized") {
                     authorized(context);
                   }
                 },

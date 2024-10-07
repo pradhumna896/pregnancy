@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pragnancy_app/comman/routes/routes.dart';
+import 'package:pragnancy_app/data/operations.dart';
 import 'package:pragnancy_app/utils/custom_toast.dart';
 import 'package:pragnancy_app/utils/time_formate_methode.dart';
 import 'package:pragnancy_app/widgets/custom_loader.dart';
@@ -24,38 +25,7 @@ class _AncCheckupInformationScreenState
 
   final TextEditingController _testDateControllers = TextEditingController();
 
-  String ancCheckup = r'''
-query GetCheckupsByMaternityId($maternityId: Float!) {
-  getCheckupsByMaternityId(maternityId: $maternityId) {
-    id
-    maternityId
-    weekNumber
-    weight
-    bloodPressure
-    hemoGlobin
-    testDate
-    createdAt
-    updatedAt
-    isCompleted
-  }
-}
-''';
-
-  String updateAncCheckup = r'''
-mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formData: UpdateCheckupInformationDto!) {
-  submitWeeklyCheckup(maternityId: $maternityId, weekNumber: $weekNumber, formData: $formData) {
-    id
-    maternityId
-    weekNumber
-    weight
-    bloodPressure
-    hemoGlobin
-    testDate
-    isCompleted
-    createdAt
-    updatedAt
-  }
-}''';
+ 
   @override
   void initState() {
     super.initState();
@@ -84,7 +54,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
           const CustomTopBarWidget(title: "anc_checkup"),
           Query(
               options: QueryOptions(
-                document: gql(ancCheckup),
+                document: gql(Operations.ancCheckup),
                 variables: {
                   "maternityId":
                       int.parse(SessionManager.getMaternityId().toString())
@@ -277,7 +247,7 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
                                             ),
                                             Mutation(
                                               options: MutationOptions(
-                                                document: gql(updateAncCheckup),
+                                                document: gql(Operations.updateAncCheckup),
                                                 onCompleted: (data) {
                                                   if (data != null) {
                                                     print(data);

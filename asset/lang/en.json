@@ -64,7 +64,11 @@
   "pregnancy_induced_hypertension":"Pregnancy Induced Hypertension (PIH)",
   "gestational_diabetes":"Gestational diabetes",
   "teenage_pregnancy":"Teenage pregnancy",
-  "prior_cesarean_operation":"Prior cesarean operation"
+  "prior_cesarean_operation":"Prior cesarean operation",
+  "state":"State",
+  "district":"District",
+  "city":"City",
+  "tehsil":"Tehsil"
   
 
   

@@ -20,7 +20,8 @@ void main() async {
   await initHiveForFlutter();
   await FirebaseApi().initNotification();
   final HttpLink httpLink = HttpLink(
-    'https://demo5.nrt.co.in/graphql',
+    // 'https://demo5.nrt.co.in/graphql',
+    "http://192.168.1.18:5001/graphql"
   );
   final AuthLink authLink = AuthLink(
     getToken: () async => 'Bearer ${SessionManager.getToken()}',
