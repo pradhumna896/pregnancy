@@ -7,7 +7,8 @@ mutation Register($registerData: RegisterDto!) {
     mobileNo
     email
     age
-    height
+    feet
+    inches
     weight
     isLoggedIn
     lastMenstrualDate
@@ -28,7 +29,7 @@ mutation Register($registerData: RegisterDto!) {
 ''';
 
   static const String addFamilyMember =
-      r'''mutation CreateFamilyMember($createUserDto: CreateUserDto!) {
+      r'''mutation CreateFamilyMember($createUserDto: FamilyMemberDto!) {
   createFamilyMember(createUserDto: $createUserDto) {
     id
     name
@@ -37,13 +38,16 @@ mutation Register($registerData: RegisterDto!) {
     age
     height
     weight
-    isLoggedIn
-    lastMenstrualDate
+    status
     createdBy
-    role
     createdAt
     updatedAt
     parentId
+    superParentId
+    state
+    district
+    city
+    tehsil
     maternityId
   }
 }''';
@@ -56,7 +60,8 @@ mutation Register($registerData: RegisterDto!) {
     mobileNo
     email
     age
-    height
+    feet
+    inches
     weight
     status
     isLoggedIn
@@ -79,13 +84,15 @@ mutation Register($registerData: RegisterDto!) {
   static const String getFamily = r'''
 query GetFamilyMembers($parentId: Int!) {
   getFamilyMembers(parentId: $parentId) {
-    id
+     id
     name
     mobileNo
     email
     age
-    height
+    feet
+    inches
     weight
+    status
     isLoggedIn
     lastMenstrualDate
     createdBy
@@ -93,7 +100,6 @@ query GetFamilyMembers($parentId: Int!) {
     updatedAt
     userType
     slug
-   
     parentId
     superParentId
     state
@@ -127,10 +133,44 @@ query GetFamilyMembers($parentId: Int!) {
       updatedAt
       weight
       maternityId
+      userType
     }
   }
 }
    ''';
+
+  static const String newLogin = r'''
+  mutation LoginMobile($loginData: LoginDtoMobile!) {
+  loginMobile(loginData: $loginData) {
+    user {
+      id
+      name
+      mobileNo
+      email
+      age
+      feet
+      inches
+      weight
+      status
+      isLoggedIn
+      lastMenstrualDate
+      createdBy
+      createdAt
+      updatedAt
+      userType
+      slug
+      parentId
+      superParentId
+      state
+      district
+      city
+      tehsil
+      maternityId
+    }
+    accessToken
+  }
+}
+  ''';
 
   static const String ancCheckup = r'''
 query GetCheckupsByMaternityId($maternityId: Float!) {
@@ -172,13 +212,59 @@ mutation SubmitWeeklyCheckup($maternityId: Float!, $weekNumber: Float!, $formDat
     name
     age
     bmi
-    pregnancyRisk
     expectedDateOfDelivery
     lastMenstrualDate
     createdAt
     updatedAt
-    
     userId
+    highRisks {
+      id
+      highBloodPressure
+      gestationalDiabetes
+      highBloodPressure
+      priorCaesareanOperation
+      severeAnemia
+      teenagePregnancy
+      maternityId
+      createdAt
+      updatedAt
+    }
+  }
+}''';
+static const String PagiganationUser = r'''
+query PaginatedPatients($paginationInput: UserPaginationInput!) {
+  paginatedPatients(paginationInput: $paginationInput) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      mobileNo
+      email
+      age
+      feet
+      inches
+      weight
+      status
+      isLoggedIn
+      lastMenstrualDate
+      createdBy
+      createdAt
+      updatedAt
+      userType
+      slug
+      parentId
+      superParentId
+      state
+      district
+      city
+      tehsil
+      maternityId
+    }
   }
 }''';
 }

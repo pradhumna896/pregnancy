@@ -9,19 +9,28 @@ import 'package:url_launcher/url_launcher.dart';
 class SchemForPragnantWomen extends StatelessWidget {
   SchemForPragnantWomen({super.key});
 
-  String schemes = r'''query AllSchemes {
-  allSchemes {
-    id
-    title
-    description
-    url
+  String schemes = r'''query PaginatedSchemes($paginationInput: SchemesPaginationInput!) {
+  paginatedSchemes(paginationInput: $paginationInput) {
+ data {
     createdAt
+    description
+    title
     updatedAt
+    id
+    url
+  }
+  meta {
+    currentPage
+    limit
+    totalItems
+    totalPages
+  }
   }
 }
 ''';
- 
 
+
+  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,6 +40,12 @@ class SchemForPragnantWomen extends StatelessWidget {
           Query(
             options: QueryOptions(
               document: gql(schemes),
+              variables: const {
+                "paginationInput": {
+                  "limit": 10,
+                  "page": 1
+                }
+              },
               onError: (error) {
                 if (error!.graphqlErrors[0].message == "Unauthorized") {
                   authorized(context);
@@ -46,24 +61,25 @@ class SchemForPragnantWomen extends StatelessWidget {
               if (result.isLoading) {
                 return const Center(child: CustomLoader());
               }
-          
-              List<SchemeModel> schems = [];
-              result.data!['allSchemes'].forEach((element) {
-                schems.add(SchemeModel.fromJson(element));
-              });
+              final data = result.data!['paginatedSchemes']['data'];
+              List<SchemeModel> schemesList = [];
+              for (var element in data) {
+                schemesList.add(SchemeModel.fromJson(element));
+              }
               return Expanded(
-                  child: ListView.separated(
-                      itemBuilder: (context, index) {
-                        return _buildExpansionTile(schems[index]);
-                      },
-                      separatorBuilder: (context, index) {
-                        return SizedBox(
-                          height: 40.h,
-                        );
-                      },
-                      itemCount: schems.length));
+                child: ListView.separated(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  itemBuilder: (context, index) {
+                    return _buildExpansionTile(schemesList[index]);
+                  },
+                  separatorBuilder: (context, index) {
+                    return SizedBox(height: 15.h);
+                  },
+                  itemCount: schemesList.length,
+                ),
+              );
             },
-          )
+          ),
         ],
       ),
     );
@@ -77,16 +93,12 @@ class SchemForPragnantWomen extends StatelessWidget {
       collapsedIconColor: Colors.white,
       backgroundColor: AppColor.secondary,
       collapsedBackgroundColor: AppColor.secondary,
-      title: Text(
-        scheme.title!,
-        style: KtxtStyle().text16DarkWhitew600,
-      ),
+      title: Text(scheme.title, style: KtxtStyle().text16DarkWhitew600),
       children: [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Text(
+          child: Text(scheme.description,
             textAlign: TextAlign.left,
-            scheme.description!,
             style: KtxtStyle().text16Whitew400,
           ),
         ),
@@ -94,11 +106,10 @@ class SchemForPragnantWomen extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: TextButton(
             onPressed: () {
-              launchUrl(Uri.parse(scheme.url!));
+              launchUrl(Uri.parse(scheme.url));
             },
-            child: Text(
+            child: Text(scheme.url,
               textAlign: TextAlign.left,
-              scheme.url!,
               style: KtxtStyle().text16Whitew400,
             ),
           ),

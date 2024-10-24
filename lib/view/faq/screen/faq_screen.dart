@@ -1,7 +1,26 @@
+import 'package:graphql_flutter/graphql_flutter.dart';
 import '../../../comman/routes/routes.dart';
+import '../../../core/error_handler.dart';
+import '../../../widgets/custom_loader.dart';
+import '../../schemeForPragnantWomens/model/scheme_model.dart';
 
 class FaqScreen extends StatelessWidget {
-  const FaqScreen({super.key});
+  FaqScreen({super.key});
+
+  String faq = r'''query Paginatedfaqs($paginationInput: FaqPaginationInput!) {
+  paginatedfaqs(paginationInput: $paginationInput) {
+    data {
+      id
+      title
+      description
+      question
+      answer
+      createdAt
+      updatedAt
+    }
+  }
+}
+''';
 
   @override
   Widget build(BuildContext context) {
@@ -16,23 +35,6 @@ class FaqScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "We’re here to help you with anything and everyting on Lorem ipsum dolor",
-                    style: TextStyle(
-                        fontSize: 27.sp,
-                        fontFamily: "Raleway",
-                        fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(
-                    height: 20.h,
-                  ),
-                  Text(
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Viverra condimentum eget purus in. Consectetur eget id morbi amet amet",
-                    style: TextStyle(
-                        fontSize: 16.sp,
-                        fontFamily: "Raleway",
-                        fontWeight: FontWeight.w400),
-                  ),
                   SizedBox(
                     height: 20.h,
                   ),
@@ -53,13 +55,63 @@ class FaqScreen extends StatelessWidget {
                 ],
               ),
             ),
-            ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return _buildExpansionTile();
+            Query(
+              options: QueryOptions(
+                document: gql(faq),
+                variables: const {
+                  "paginationInput": {
+                    "limit": 10,
+                    "page": 1
+                  }
+                },
+                onError: (error) {
+                  if (error!.graphqlErrors[0].message == "Unauthorized") {
+                    authorized(context);
+                  }
+                },
+              ),
+              builder: (result, {fetchMore, refetch}){
+                if (result.hasException) {
+                  return Center(
+                    child: Text(result.exception!.graphqlErrors[0].message),
+                  );
+                }
+                if (result.isLoading) {
+                  return const Center(child: CustomLoader());
+                }
+                final data = result.data!['paginatedfaqs']['data'];
+                List<FaModel> schemesList = [];
+                for (var element in data) {
+                  schemesList.add(FaModel.fromJson(element));
+                }
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: schemesList.length,
+                  itemBuilder: (context, index) {
+                    var data = schemesList[index];
+                    return Column(
+                      children: [
+                        ExpansionTile(
+                          trailing: const Icon(Icons.add),
+                          title: Text(data.question,
+                            style: KtxtStyle().text16DarkBlackw600,
+                          ),
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 20.w),
+                              child: Text(data.answer,
+                                style: KtxtStyle().text16Blackw400,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider()
+                      ],
+                    );
+                  },
+                );
               },
             ),
             SizedBox(
@@ -122,7 +174,7 @@ class FaqScreen extends StatelessWidget {
     );
   }
 
-  Column _buildExpansionTile() {
+  Column _buildExpansionTile(SchemeModel scheme) {
     return Column(
       children: [
         ExpansionTile(

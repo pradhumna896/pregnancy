@@ -2,10 +2,12 @@ import 'package:pragnancy_app/theme/app_gradient.dart';
 import 'package:pragnancy_app/view/anc_checkup_information/screen/anc_checkup_information_screen.dart';
 import 'package:pragnancy_app/view/completePragnancyCalendar/screen/complete_pragnancy_calendar_screen.dart';
 import 'package:pragnancy_app/view/high_risk_pragnancy_screen/screen/high_risk_pragnancy_screen.dart';
+import 'package:pragnancy_app/view/home/usha/pages/patients_screen.dart';
 import 'package:pragnancy_app/view/maternity/screen/maternity_info_screen.dart';
 import 'package:pragnancy_app/view/schemeForPragnantWomens/screen/schem_for_pragnant_women.dart';
 import 'package:pragnancy_app/view/settings/screen/settings_screen.dart';
 import '../../../comman/routes/routes.dart';
+import '../../settings/screen/addedPregnancyWomen.dart';
 
 // ignore: must_be_immutable
 class HomeScreen extends StatelessWidget {
@@ -32,13 +34,21 @@ class HomeScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: ListView.builder(
                 padding: EdgeInsets.zero,
-                itemCount: cardList.length,
+                itemCount: SessionManager.getUserType() == "usha"
+                    ? patientList.length
+                    : cardList.length,
                 itemBuilder: (context, index) {
                   return CustomCardWidget(
-                    title: cardList[index].title,
+                    title: SessionManager.getUserType() == "usha"
+                        ? patientList[index].title
+                        : cardList[index].title,
                     gradient: cardList[index].gradient,
-                    image: cardList[index].imagePath,
-                    page: cardList[index].page,
+                    image:SessionManager.getUserType() == "usha"
+                        ? patientList[index].imagePath
+                        : cardList[index].imagePath,
+                    page: SessionManager.getUserType() == "usha"
+                        ? patientList[index].page
+                        : cardList[index].page,
                   );
                 },
               ),
@@ -50,11 +60,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   List<CardModel> patientList = [
-   CardModel(
+    CardModel(
       title: "Patient",
       imagePath: "asset/images/highRisk.png",
       gradient: AppGradient().highRiskPragnancyGradient,
-      page: HighRiskPragnancyScreen(),
+      page: PatientsScreen(),
     ),
   ];
 
@@ -84,9 +94,15 @@ class HomeScreen extends StatelessWidget {
       page: AncCheckupInformationScreen(),
     ),
     CardModel(
+      title: "pregnancy_woman_details",
+      imagePath: "asset/images/highRisk.png",
+      gradient: AppGradient().schemeGradient,
+      page: Addedpregnancywomen(),
+    ),
+    CardModel(
       title: "schemes_for_pregnant_women",
       imagePath: "asset/images/scheme_for_pragnent.png",
-      gradient: AppGradient().schemeGradient,
+      gradient: AppGradient().ancCheckupGradient,
       page: SchemForPragnantWomen(),
     ),
   ];

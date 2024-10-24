@@ -1,6 +1,7 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:hive/hive.dart';
 import 'package:pragnancy_app/bloc/localization/localization_bloc.dart';
-import 'package:pragnancy_app/bloc/localization/localization_event.dart';
 import 'package:pragnancy_app/bloc/localization/localization_state.dart';
 import 'package:pragnancy_app/core/error_handler.dart';
 import 'package:pragnancy_app/data/operations.dart';
@@ -8,7 +9,9 @@ import 'package:pragnancy_app/view/about/screen/about_screen.dart';
 import 'package:pragnancy_app/view/auth/screen/register_screen.dart';
 import 'package:pragnancy_app/view/faq/screen/faq_screen.dart';
 import 'package:pragnancy_app/widgets/custom_loader.dart';
+import '../../../bloc/localization/localization_event.dart';
 import '../../../comman/routes/routes.dart';
+import '../../home/usha/pages/asha_editProfile.dart';
 
 // ignore: must_be_immutable
 class SettingsScreen extends StatefulWidget {
@@ -19,15 +22,17 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  String userFind = r'''query FindUserById($findUserByIdId: Float!) {
+  String userFind = r"""query FindUserById($findUserByIdId: Float!) {
   findUserById(id: $findUserByIdId) {
     id
     name
     mobileNo
     email
     age
-    height
+    feet
+    inches
     weight
+    status
     isLoggedIn
     lastMenstrualDate
     createdBy
@@ -35,7 +40,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     updatedAt
     userType
     slug
-
     parentId
     superParentId
     state
@@ -44,197 +48,231 @@ class _SettingsScreenState extends State<SettingsScreen> {
     tehsil
     maternityId
   }
-}''';
+}""";
+
+  dynamic user; // Define user at the class level
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+    load();
+  }
+  load(){}
+
+  Future<void> _fetchUserData() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult != ConnectivityResult.none) {
+      final result = await _fetchFromNetwork();
+      if (result != null) {
+        setState(() {
+          user = result;
+        });
+        await _saveToHive(result);
+      } else {
+        _loadFromHive();
+      }
+    } else {
+      _loadFromHive();
+    }
+  }
+
+  Future<dynamic> _fetchFromNetwork() async {
+    final options = QueryOptions(
+      document: gql(userFind),
+      variables: {
+        "findUserByIdId": int.parse(SessionManager.getUserId()!)
+      },
+    );
+
+    final result = await GraphQLProvider.of(context).value.query(options);
+    if (result.hasException) {
+      print(result.exception.toString());
+      return null;
+    }
+    return result.data!["findUserById"];
+  }
+
+  Future<void> _saveToHive(dynamic userData) async {
+    final box = await Hive.openBox('userBox');
+    box.put('user', userData);
+  }
+
+  Future<void> _loadFromHive() async {
+    final box = await Hive.openBox('userBox');
+    final userData = box.get('user');
+    if (userData != null) {
+      setState(() {
+        user = userData;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocBuilder<LocalizationBloc, LocalizationState>(
         builder: (context, state) {
-          return Query(
-            options: QueryOptions(
-              document: gql(userFind),
-              variables: {
-                "findUserByIdId": int.parse(SessionManager.getUserId()!)
-              },
-              onError: (error) {
-                if (error!.graphqlErrors[0].message == "Unauthorized") {
-                  authorized(context);
-                }
-              },
-            ),
-            builder: (result, {fetchMore, refetch}) {
-              if (result.hasException) {
-                return Text(result.exception!.graphqlErrors[0].message);
-              }
-              if (result.isLoading) {
-                return const Center(child: CustomLoader());
-              }
-
-              var user = result.data!["findUserById"];
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    CustomTopBarWidget(
-                      title: "settings",
-                      onPress: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HomeScreen(),
-                          ),
-                          (route) => false,
-                        );
-                      },
-                    ),
-                    SizedBox(height: 20.h),
-                    Container(
-                        decoration:
-                            const BoxDecoration(color: AppColor.secondary),
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundImage:
-                                AssetImage("asset/images/User image (1).png"),
-                          ),
-                          title: InkWell(
-                            onTap: () {
-                              showModalBottomSheet(
-                                backgroundColor: AppColor.secondary,
-                                context: context,
-                                builder: (context) {
-                                  return ShowCustomModelBottomSheet(
-                                    parentId:
-                                        int.parse(SessionManager.getUserId()!),
-                                  );
-                                },
-                              );
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  user!['name'],
-                                  style: KtxtStyle().text14Whitew700,
-                                ),
-                                Icon(
-                                  Icons.arrow_drop_down,
-                                  size: 30.sp,
-                                  color: Colors.white,
-                                )
-                              ],
-                            ),
-                          ),
-                          subtitle: Text(
-                            "${getLocalized(context, "age")} ${user["age"]}",
-                            style: KtxtStyle().text12Whitew700,
-                          ),
-                          trailing: IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => RegisterScreen(
-                                          title: "edit_profile",
-                                          user: user,
-                                        )),
-                              );
-                            },
-                            icon: const Icon(
-                              Icons.edit,
-                              color: AppColor.white,
-                            ),
-                          ),
-                        )),
-                    SizedBox(height: 20.h),
-                    // switch button for change language
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Radio(
-                            value: SessionManager.getLanguage() == "en",
-                            groupValue: true,
-                            onChanged: (val) {
-                              context
-                                  .read<LocalizationBloc>()
-                                  .add(const LoadLocalization("en"));
-                            }),
-                        Text(
-                          "English",
-                          style: KtxtStyle().text14DarkBlackw700,
-                        ),
-                        Radio(
-                            value: SessionManager.getLanguage() != "en",
-                            groupValue: true,
-                            onChanged: (val) {
-                              context
-                                  .read<LocalizationBloc>()
-                                  .add(const LoadLocalization("hi"));
-                            }),
-                        Text(
-                          "Hindi",
-                          style: KtxtStyle().text14DarkBlackw700,
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 20.h,
-                    ),
-                    ProfileMenuWidget(
-                      title: getLocalized(context, "add_family_members"),
-                      icon: "asset/svg/add_family_member.svg",
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RegisterScreen(
-                                  id: int.parse(SessionManager.getUserId()!),
-                                  title: "add_family_members"),
-                            ));
-                      },
-                    ),
-                    ProfileMenuWidget(
-                      title: getLocalized(context, 'faq'),
-                      icon: "asset/svg/faq.svg",
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const FaqScreen(),
-                            ));
-                      },
-                    ),
-                    ProfileMenuWidget(
-                      title: getLocalized(context, "about"),
-                      icon: "asset/svg/about.svg",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AboutScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    ProfileMenuWidget(
-                      endIcon: false,
-                      title: getLocalized(context, "sign_out"),
-                      icon: "asset/svg/signout.svg",
-                      onTap: () {
-                        onTapLogout(context);
-                      },
-                    ),
-                  ],
+          if (user == null) {
+            return const Center(child: CustomLoader());
+          }
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                CustomTopBarWidget(
+                  title: "settings",
+                  onPress: () {
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => HomeScreen()), (route) => false);
+                  },
                 ),
-              );
-            },
+                SizedBox(height: 20.h),
+                Container(
+                  decoration: const BoxDecoration(color: AppColor.secondary),
+                  child: ListTile(
+                    leading: const CircleAvatar(
+                      backgroundImage: AssetImage("asset/images/User image (1).png"),
+                    ),
+                    title: InkWell(
+                      onTap: () {
+                        showModalBottomSheet(
+                          backgroundColor: AppColor.secondary,
+                          context: context,
+                          builder: (context) {
+                            return ShowCustomModelBottomSheet(
+                              parentId: int.parse(SessionManager.getUserId()!),
+                            );
+                          },
+                        );
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            user['name'] ?? "No Name",
+                            style: KtxtStyle().text14Whitew700,
+                          ),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            size: 30.sp,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                    subtitle: Text(
+                      "${getLocalized(context, "age")} ${user["age"] ?? "N/A"}",
+                      style: KtxtStyle().text12Whitew700,
+                    ),
+                    trailing: IconButton(
+                      onPressed: () {
+                        SessionManager.getUserType().toString() == "usha" ?
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ashaProfile())) :
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterScreen(title: "edit_profile", user: user)));
+                      },
+                      icon: const Icon(
+                        Icons.edit,
+                        color: AppColor.white,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     Radio(
+                //         value: SessionManager.getLanguage() == "en",
+                //         groupValue: true,
+                //         onChanged: (val) {
+                //           context
+                //               .read<LocalizationBloc>()
+                //               .add(const LoadLocalization("en"));
+                //         }),
+                //     Text(
+                //       "English",
+                //       style: KtxtStyle().text14DarkBlackw700,
+                //     ),
+                //     Radio(
+                //         value: SessionManager.getLanguage() != "en",
+                //         groupValue: true,
+                //         onChanged: (val) {
+                //           context
+                //               .read<LocalizationBloc>()
+                //               .add(const LoadLocalization("hi"));
+                //         }),
+                //     Text(
+                //       "Hindi",
+                //       style: KtxtStyle().text14DarkBlackw700,
+                //     ),
+                //   ],
+                // ),
+                ProfileMenuWidget(
+                  title: getLocalized(context, "add_family_members"),
+                  icon: "asset/svg/add_family_member.svg",
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                        RegisterScreen(id: int.parse(SessionManager.getUserId()!),
+                            title: "add_family_members")));
+                  },
+                ),
+                ProfileMenuWidget(
+                  title: getLocalized(context, 'faq'),
+                  icon: "asset/svg/faq.svg",
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FaqScreen(),
+                        ));
+                  },
+                ),
+                ProfileMenuWidget(
+                  title: getLocalized(context, "about"),
+                  icon: "asset/svg/about.svg",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AboutScreen(),
+                      ),
+                    );
+                  },
+                ),
+
+                /// login user and api user id == show size box and id not match show switch button
+
+                SessionManager.getUserIdSwitch().toString() == user['id'].toString() ?
+                SizedBox() :
+                ProfileMenuWidget(
+                  endIcon: false,
+                  title: getLocalized(context, "switch"),
+                  icon: "asset/svg/add_family_member.svg",
+                  onTap: () {
+                    SessionManager.setUserType(SessionManager.getUserTypeSwitch().toString());
+                    SessionManager.setUserId(SessionManager.getUserIdSwitch().toString());
+                    SessionManager.setMaternityId(SessionManager.getMaternityIdSwitch().toString());
+                    SessionManager.setName(SessionManager.getNameSwitch().toString());
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()),);
+                  },
+                ),
+
+                ProfileMenuWidget(
+                  endIcon: false,
+                  title: getLocalized(context, "sign_out"),
+                  icon: "asset/svg/signout.svg",
+                  onTap: () {
+                    onTapLogout(context);
+                  },
+                ),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  onTapLogout(
-    context,
+  onTapLogout(context,
   ) {
     showDialog(
       context: context,
@@ -252,7 +290,7 @@ class ShowCustomModelBottomSheet extends StatelessWidget {
     super.key,
     required this.parentId,
   });
- 
+
   @override
   Widget build(BuildContext context) {
     return Query(
@@ -274,7 +312,6 @@ class ShowCustomModelBottomSheet extends StatelessWidget {
             child: CircularProgressIndicator(),
           );
         }
-
         var users = result.data!["getFamilyMembers"];
         return Container(
           decoration: BoxDecoration(
@@ -288,11 +325,10 @@ class ShowCustomModelBottomSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               users.isEmpty
-                  ? Container(
+                  ? SizedBox(
                       height: 100.h,
                       child: Center(
-                          child: Text(
-                        "No family members found",
+                          child: Text("No family members found",
                         style: TextStyle(fontSize: 16,color: Colors.white),
                       )),
                     )
@@ -304,14 +340,11 @@ class ShowCustomModelBottomSheet extends StatelessWidget {
                         return ListTile(
                           trailing: IconButton(
                             onPressed: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //       builder: (context) => RegisterScreen(
-                              //             title: "edit_profile",
-                              //             user: user,
-                              //           )),
-                              // );
+                              SessionManager.setUserType(user["userType"]);
+                              SessionManager.setUserId(user["id"].toString());
+                              SessionManager.setMaternityId(user["maternityId"].toString());
+                              SessionManager.setName(user["name"]);
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()),);
                             },
                             icon: const Icon(
                               Icons.edit,
@@ -322,12 +355,10 @@ class ShowCustomModelBottomSheet extends StatelessWidget {
                             backgroundImage:
                                 AssetImage("asset/images/User image (1).png"),
                           ),
-                          title: Text(
-                            user["name"],
+                          title: Text(user["name"],
                             style: KtxtStyle().text14Whitew700,
                           ),
-                          subtitle: Text(
-                            "age ${user["age"]}",
+                          subtitle: Text("age ${user["age"]}",
                             style: KtxtStyle().text12Whitew700,
                           ),
                         );

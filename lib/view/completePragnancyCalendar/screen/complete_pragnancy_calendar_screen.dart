@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:pragnancy_app/core/error_handler.dart';
@@ -37,6 +38,8 @@ query AllCalendar {
 }
 ''';
 
+  var finalDay;
+
   String maternityById = r'''
 query FindMaternityById($findMaternityByIdId: Float!) {
   findMaternityById(id: $findMaternityByIdId) {
@@ -50,6 +53,17 @@ query FindMaternityById($findMaternityByIdId: Float!) {
     createdAt
     updatedAt
     userId
+    highRisks {
+      id
+      severeAnemia
+      highBloodPressure
+      gestationalDiabetes
+      teenagePregnancy
+      priorCaesareanOperation
+      maternityId
+      createdAt
+      updatedAt
+    }
   }
 }''';
   Future<void> downloadAndShareFile(String url) async {
@@ -75,6 +89,35 @@ query FindMaternityById($findMaternityByIdId: Float!) {
       print('Error: $e');
     }
   }
+
+  DateTime calculateDate(String dateStr, int daysToAdd) {
+    // Parse the input date (assumed format: yyyy-MM-dd)
+    List<String> parts = dateStr.split('-');
+    int year = int.parse(parts[0]);
+    int month = int.parse(parts[1]);
+    int day = int.parse(parts[2]);
+
+    // Create the initial date
+    DateTime initialDate = DateTime(year, month, day);
+
+    // Add the specified number of days
+    DateTime newDate = initialDate.add(Duration(days: daysToAdd));
+
+    // Loop to find the next Tuesday (3) or Friday (5)
+    while (newDate.weekday != 2 && newDate.weekday != 5) {
+      // Increment by one day until it's Tuesday or Friday
+      newDate = newDate.add(Duration(days: 1));
+    }
+
+    return newDate;
+  }
+
+  String formatDate(DateTime date) {
+    // Format date as dd-MM-yyyy
+    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+  }
+  bool isButtonDisabled = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -108,8 +151,7 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                                 }
                               },
                               variables: {
-                                "findMaternityByIdId": int.parse(
-                                    SessionManager.getMaternityId().toString())
+                                "findMaternityByIdId": int.parse(SessionManager.getMaternityId().toString())
                               }),
                           builder: (result, {fetchMore, refetch}) {
                             if (result.isLoading) {
@@ -122,8 +164,8 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                                 child: Text(result.exception.toString()),
                               );
                             }
-                            MaternityModel data = MaternityModel.fromJson(
-                                result.data!["findMaternityById"]);
+                            MaternityModel data = MaternityModel.fromJson(result.data!["findMaternityById"]);
+                            finalDay = TimeFormateMethod().getTimeFormate(time: data.lastMenstrualDate.toString());
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -168,8 +210,7 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                             shape: BoxShape.circle,
                             color: Colors.grey,
                             image: DecorationImage(
-                              image:
-                                  AssetImage("asset/images/User image (1).png"),
+                              image: AssetImage("asset/images/User image (1).png"),
                             ),
                           ),
                         ),
@@ -189,9 +230,7 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                 ],
               ),
             ),
-            SizedBox(
-              height: 20.h,
-            ),
+            SizedBox(height: 20.h),
             Query(
               options: QueryOptions(
                 document: gql(allCalender),
@@ -209,7 +248,6 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                 if (result.isLoading) {
                   return const Center(child: CustomLoader());
                 }
-
                 List<AllCalendarModel> data = [];
                 result.data!["allCalendar"].forEach((element) {
                   data.add(AllCalendarModel.fromJson(element));
@@ -219,15 +257,31 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                     padding: EdgeInsets.only(top: 10),
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
+
+                      /// calculation date
+
+                      DateTime resultDate = calculateDate(finalDay, data[index].weekNumber!.toInt());
+                      String displayDate = formatDate(resultDate);
+                      String currentDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
+                      /// check time before logic
+                      DateTime currentDateTime = DateFormat('dd-MM-yyyy').parse(currentDate);
+                      DateTime displayDateTime = DateFormat('dd-MM-yyyy').parse(displayDate);
+                      bool isBefore = currentDateTime.isBefore(displayDateTime);
+                      /// for day like monday friday
+                      String dateString = displayDate;
+                      DateTime date = DateFormat('dd-MM-yyyy').parse(dateString);
+                      String dayOfWeek = DateFormat('EEEE').format(date);
                       return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 30, vertical: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
                         child: TestCard(
                             weekNumber: data[index].weekNumber!,
-                            testDate: TimeFormateMethod().getTimeFormate(
-                                formate: "EEEE-dd/MM/yyyy",
-                                time: data[index].testDate.toString()),
-                            description: data[index].description!),
+                            testDate: displayDate,
+                            // testDate: TimeFormateMethod().getTimeFormate(formate: "EEEE-dd/MM/yyyy",
+                            //     time: data[index].testDate.toString()),
+                            description: data[index].description!,
+                           colorCheck: isBefore == true ? true : false,
+                          dayDate: dayOfWeek,
+                        ),
                       );
                     },
                     separatorBuilder: (context, index) {
@@ -236,9 +290,7 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                     itemCount: data.length);
               },
             ),
-            SizedBox(
-              height: 20.h,
-            ),
+            SizedBox(height: 20.h),
             Query(
               options: QueryOptions(
                 document: gql(r'''query Query {
@@ -264,33 +316,34 @@ query FindMaternityById($findMaternityByIdId: Float!) {
                 return Padding(
                   padding: EdgeInsets.symmetric(horizontal: 30.w),
                   child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColor.secondary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isButtonDisabled ? Colors.grey : AppColor.secondary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
                       ),
-                      onPressed: () {
-                        downloadAndShareFile(
-                            mediaUrl + result.data!["exportDataToCsv"]);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          getLocalized(
-                            context,
-                            "complete_pragnancy_calender_for_whatsapp",
-                          ),
-                          textAlign: TextAlign.center,
-                          style: KtxtStyle().text17Whitew700,
-                        ),
-                      )),
+                    ),
+                    onPressed: isButtonDisabled
+                        ? null // Disable button if it has already been clicked
+                        : () {
+                      setState(() {
+                        isButtonDisabled = true; // Disable the button after click
+                      });
+
+                      downloadAndShareFile(mediaUrl + result.data!["exportDataToCsv"]);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        getLocalized(context, "complete_pragnancy_calender_for_whatsapp"),
+                        textAlign: TextAlign.center,
+                        style: KtxtStyle().text17Whitew700,
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
-            SizedBox(
-              height: 20.h,
-            )
+            SizedBox(height: 20.h,)
           ],
         ),
       ),
@@ -337,18 +390,23 @@ class TestCard extends StatelessWidget {
   final int weekNumber;
   final String testDate;
   final String description;
+  final bool colorCheck;
+  final String dayDate;
 
   const TestCard({
     Key? key,
     required this.weekNumber,
     required this.testDate,
     required this.description,
+    required this.colorCheck,
+    required this.dayDate
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
+      color: colorCheck == true ? Colors.white : Colors.grey[300],
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
@@ -357,27 +415,13 @@ class TestCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Week $weekNumber',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+            Text("${getLocalized(context, "day")} : $weekNumber",style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Text("${getLocalized(context, "test_date")} : $testDate - $dayDate",
+              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
             ),
             SizedBox(height: 8),
-            Text(
-              'Test Date: $testDate',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[700],
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              description,
-              style: TextStyle(
-                fontSize: 16,
-              ),
+            Text(description, style: TextStyle(fontSize: 16,color: Colors.black),
             ),
           ],
         ),

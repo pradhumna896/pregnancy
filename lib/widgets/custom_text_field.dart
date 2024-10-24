@@ -174,8 +174,7 @@ class CustomTextFormField extends StatelessWidget {
         isDense: true,
         counterStyle: const TextStyle(color: Colors.white),
         errorStyle: const TextStyle(color: Colors.red),
-        contentPadding: contentPadding ??
-            EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+        contentPadding: contentPadding ?? EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
         fillColor: fillColor ?? AppColor.white,
         filled: filled,
         enabledBorder: borderDecoration ??

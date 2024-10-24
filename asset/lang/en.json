@@ -33,7 +33,7 @@
   "otp": "OTP",
   "enter_otp": "Enter your OTP",
   "height": "Height (cm)",
-  "enter_your_height":"Enter your hieght",
+  "enter_your_height":"Enter your height",
   "enter_your_feet": "Enter your feet",
   "feet": "Feet",
   "enter_your_inches": "Enter your inches",
@@ -43,11 +43,11 @@
   "last_menstrual_start_date": "Last Menstrual Start Date (L.M.P.)",
   "enter_your_last_menstrual_start_date": "Enter your last menstrual start date (L.M.P.)",
   "done": "Done",
-  "add_family_members":"Add Family Members",
+  "add_family_members":"Add Pregnancy Members",
   "about":"About",
   "sign_out":"Sign Out",
   "settings":"Settings",
-  "are_you_sure":"Are you sure you want to signout?",
+  "are_you_sure":"Are you sure you want to logout?",
   "ok":"Ok",
   "cancel":"Cancel",
   "edit_profile":"Edit Profile",
@@ -55,7 +55,7 @@
   "first_anc_checkup" :"First A.N.C. checkup",
   "date":"Date",
   "enter_your_date":"Enter Your Date",
-  "blood_pressure":"Blood Pressure",
+  "blood_pressure":"Blood Pressure (High/Low)",
   "enter_your_blood_pressure":"Enter Your Blood Pressure",
   "hemoglobin":"Hemoglobin %",
   "enter_your_hemoglobin":"Enter Your Hemoglobin %",
@@ -68,12 +68,12 @@
   "state":"State",
   "district":"District",
   "city":"City",
-  "tehsil":"Tehsil"
-  
-
-  
-
-
-
-
+  "tehsil":"Tehsil",
+  "enter_your_tehsil" : "Enter your tehsil",
+  "enter_your_city" : "Enter your city",
+  "pregnancy_woman_details" : "Pregnancy Woman Details",
+  "select_only_day" : "Please select a date that is a Tuesday or Friday.",
+  "day" : "Day",
+  "switch" : "Switch Account",
+  "test_date" : "Test Date"
 }

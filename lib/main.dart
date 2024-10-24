@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pragnancy_app/bloc/localization/localization_bloc.dart';
 import 'package:pragnancy_app/bloc/localization/localization_event.dart';
 import 'package:pragnancy_app/bloc/localization/localization_state.dart';
@@ -18,25 +20,24 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await SessionManager.init();
   await initHiveForFlutter();
+  await Hive.initFlutter();
+  await Hive.openBox('dataBox');
   await FirebaseApi().initNotification();
   final HttpLink httpLink = HttpLink(
-    // 'https://demo5.nrt.co.in/graphql',
-    "http://192.168.1.18:5001/graphql"
+    'https://demo5.nrt.co.in/graphql',
+    // "http://192.168.1.19:5001/graphql"
   );
   final AuthLink authLink = AuthLink(
     getToken: () async => 'Bearer ${SessionManager.getToken()}',
   );
-
   final Link link = authLink.concat(httpLink);
-
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
       link: link,
       cache: GraphQLCache(store: HiveStore()),
     ),
   );
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((_) {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
     runApp(MyApp(
       client: client,
     ));
@@ -64,10 +65,9 @@ class _MyAppState extends State<MyApp> {
             builder: (context, state) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                title: 'Flutter Demo',
+                title: 'Pregnancy',
                 theme: ThemeData(
-                  colorScheme:
-                      ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
                   useMaterial3: true,
                 ),
                 onGenerateRoute: AppPages.generateRouteSetting,

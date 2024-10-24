@@ -5,14 +5,23 @@ class SessionManager {
   static const _user = "access_token";
   static const _token = "token";
   static const _userId = "userId";
+  static const _userType = "userType";
   static const _maternityId = "maternityId";
   static const _role = "role";
   static const _permissions = "permissions";
   static const _language = "language";
   static const _userName = "userName";
 
-  static Future init() async =>
-      preferences = await SharedPreferences.getInstance();
+  /// for switch user
+
+  static const _userIdSwitch = "userIdSwitch";
+  static const _userTypeSwitch = "userTypeSwitch";
+  static const _maternityIdSwitch = "maternityIdSwitch";
+  static const _userNameSwitch = "userNameSwitch";
+
+  /// for switch account
+
+  static Future init() async => preferences = await SharedPreferences.getInstance();
 
   static dynamic setLanguage(String language) {
     return preferences!.setString(_language, language);
@@ -67,6 +76,13 @@ class SessionManager {
   static dynamic getName() {
     return preferences!.getString(_userName);
   }
+  static dynamic setUserType(String userType) {
+    return preferences!.setString(_userType, userType);
+  }
+
+  static dynamic getUserType() {
+    return preferences!.getString(_userType);
+  }
 
   static dynamic setPermissions(List<String> permission) {
     return preferences!.setStringList(_permissions, permission);
@@ -79,4 +95,35 @@ class SessionManager {
   static dynamic removeToken() {
     return preferences!.remove(_token);
   }
+
+  /// for switch account
+
+  static dynamic setUserIdSwitch(String userIdSwitch) {
+    return preferences!.setString(_userIdSwitch, userIdSwitch);
+  }
+  static String? getUserIdSwitch() {
+    return preferences!.getString(_userIdSwitch);
+  }
+
+  static dynamic setUserTypeSwitch(String userTypeSwitch) {
+    return preferences!.setString(_userTypeSwitch, userTypeSwitch);
+  }
+  static String? getUserTypeSwitch() {
+    return preferences!.getString(_userTypeSwitch);
+  }
+
+  static dynamic setMaternityIdSwitch(String maternityIdSwitch) {
+    return preferences!.setString(_maternityIdSwitch, maternityIdSwitch);
+  }
+  static String? getMaternityIdSwitch() {
+    return preferences!.getString(_maternityIdSwitch);
+  }
+
+  static dynamic setNameSwitch(String userNameSwitch) {
+    return preferences!.setString(_userNameSwitch, userNameSwitch);
+  }
+  static String? getNameSwitch() {
+    return preferences!.getString(_userNameSwitch);
+  }
+
 }

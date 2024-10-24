@@ -126,7 +126,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
                     validator: widget.validator,
                     dropdownBuilder: (context, selectedItem) {
                       return Text(selectedItem ?? widget.labelText,
-                          style: KtxtStyle().text14Hint500
+                          style:  TextStyle(color: Colors.black87, fontSize: 14.sp,fontWeight: FontWeight.w400,),
                           // style: AppTextStyles.bodyText,
                           );
                     },
@@ -167,11 +167,10 @@ class _CustomDropdownState extends State<CustomDropdown> {
           color: appTheme.red600D8,
           fontWeight: FontWeight.w400,
           fontSize: 10.sp),
-      prefixIcon: isPrefixIcon == false
-          ? null
-          : Padding(
-              padding: EdgeInsets.only(top: 20.h, bottom: 20.h),
-              child: prefixIcon,
+      prefixIcon: isPrefixIcon == false ? null :
+      Padding(
+        padding: EdgeInsets.only(top: 20.h, bottom: 20.h),
+        child: prefixIcon,
             ),
       suffixIcon: Padding(
         padding: EdgeInsets.only(
